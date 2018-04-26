@@ -1,0 +1,13 @@
+D:\mayank\E drive\c#\TVS\WPF\RingRing\bin\Debug\RingRing.exe
+D:\mayank\E drive\c#\TVS\WPF\RingRing\bin\Debug\RingRing.pdb
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\MainWindow.g.cs
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\App.g.cs
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\RingRing_MarkupCompile.cache
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\RingRing_MarkupCompile.lref
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\MainWindow.baml
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\RingRing.g.resources
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\RingRing.Properties.Resources.resources
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\RingRing.csproj.GenerateResource.Cache
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\RingRing.exe
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\RingRing.pdb
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\RingRing.csprojResolveAssemblyReference.cache

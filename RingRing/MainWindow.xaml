@@ -1,0 +1,29 @@
+﻿<Window x:Class="RingRing.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RingRing"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="700" Width="580" Background="Transparent" WindowStyle="None" AllowsTransparency="True"  >
+    <Grid>
+        <Border ClipToBounds="True" CornerRadius="15" Background="#F9F6F6" Name="BorderPanel" Height="429" Width="580" Margin="0,261,0,0" >
+            <Canvas HorizontalAlignment="Left" Height="429" Margin="0,271,0,0" VerticalAlignment="Top" Width="580"/>
+        </Border>
+        <Canvas Background="Transparent" HorizontalAlignment="Left" Height="700" Margin="0,0,0,0" VerticalAlignment="Top" Width="580">
+            <Image Name="_bubbleImage"  Height="303" Width="221" Source="/Resources/bubble-shape3x.png" MouseDown="_bubbleImage_MouseDown" Canvas.Left="359.196" Canvas.Top="1.72" />
+            <ListView Name="ListView1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="343" Height="200" Canvas.Left="117" Canvas.Top="335">
+
+            </ListView>
+        </Canvas>
+        <Label x:Name="_lbl_lastTxn" Tag="Last transaction" Width="100" Height="30" HorizontalContentAlignment="Center" Margin="421.636,177.42,58.364,492.58">
+            <TextBlock Cursor="Hand" TextDecorations="Underline" Text="{Binding Path=Tag,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Label}}}" 
+                       Foreground="#FF3C4788" PreviewMouseLeftButtonDown="TextBlock_PreviewMouseLeftButtonDown"  FontSize="12" FontWeight="Bold"/>
+        </Label>
+        <Image Name="_okImage" Width="34" Height="34" Source="/Resources/ok_Green.png" Margin="453.999,24,90.001,640" RenderTransformOrigin="0.177,-4.308" />
+        <Image Name="_wifiImage" Width="34" Height="34" Source="/Resources/wifi_Green.png" Margin="521.5,6,24.5,660" />
+        <Image Name="_enterPin" Width="130" Height="82" Source="/Resources/enterPin.png" Margin="406.636,84.089,43.364,533.911" />
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="40" FontSize="26" Margin="403.804,84.086,0,0" TextWrapping="Wrap" Text="123 - 112" TextAlignment="Center" VerticalAlignment="Top" Width="136" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0" Background="{x:Null}" MaxLength="9" MaxLines="1" Foreground="White"/>
+        <TextBox x:Name="textBox1" HorizontalAlignment="Left" Height="40" FontSize="26" Margin="403.804,126.42,0,0" TextWrapping="Wrap" Text="123 - 888" TextAlignment="Center" VerticalAlignment="Top" Width="136" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0" Background="{x:Null}" Foreground="White" MaxLength="9" MaxLines="1"/>
+    </Grid>
+</Window>

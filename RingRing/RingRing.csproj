@@ -33,6 +33,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <Win32Resource>
+    </Win32Resource>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -98,6 +102,24 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\wifi_Red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\enterPingrey.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\RingRinglogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\cross_Red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\save_Green.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\todayCalender.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\exportCsv.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

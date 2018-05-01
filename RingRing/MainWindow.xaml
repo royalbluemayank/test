@@ -4,26 +4,150 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RingRing"
+        Icon="/Resources/RingRinglogo.png"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="580" Background="Transparent" WindowStyle="None" AllowsTransparency="True"  >
-    <Grid>
-        <Border ClipToBounds="True" CornerRadius="15" Background="#F9F6F6" Name="BorderPanel" Height="429" Width="580" Margin="0,261,0,0" >
-            <Canvas HorizontalAlignment="Left" Height="429" Margin="0,271,0,0" VerticalAlignment="Top" Width="580"/>
-        </Border>
-        <Canvas Background="Transparent" HorizontalAlignment="Left" Height="700" Margin="0,0,0,0" VerticalAlignment="Top" Width="580">
-            <Image Name="_bubbleImage"  Height="303" Width="221" Source="/Resources/bubble-shape3x.png" MouseDown="_bubbleImage_MouseDown" Canvas.Left="359.196" Canvas.Top="1.72" />
-            <ListView Name="ListView1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="343" Height="200" Canvas.Left="117" Canvas.Top="335">
+        Title="MainWindow" WindowStartupLocation="Manual" Height="720" Width="500" Background="Transparent" WindowStyle="None" AllowsTransparency="True"  >
+    <Window.Resources>
+        <Style TargetType="{x:Type Button}" x:Key="ImageButtonStyle">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="FavsScrollViewer" TargetType="{x:Type ScrollViewer}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <ScrollContentPresenter Grid.Column="1"/>
+                            <ScrollBar Name="PART_VerticalScrollBar"  Value="{TemplateBinding VerticalOffset}"
+Maximum="{TemplateBinding ScrollableHeight}"
+            ViewportSize="{TemplateBinding ViewportHeight}"
+                  Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                            <ScrollBar Name="PART_HorizontalScrollBar"
+            Orientation="Horizontal"            Grid.Row="1"            Grid.Column="1"            Value="{TemplateBinding HorizontalOffset}"
+            Maximum="{TemplateBinding ScrollableWidth}"
+           ViewportSize="{TemplateBinding ViewportWidth}"
+            Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
 
-            </ListView>
-        </Canvas>
-        <Label x:Name="_lbl_lastTxn" Tag="Last transaction" Width="100" Height="30" HorizontalContentAlignment="Center" Margin="421.636,177.42,58.364,492.58">
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Border ClipToBounds="True" CornerRadius="15" Background="#F9F6F6" Name="BorderPanel" Width="500" Margin="0,237.5,0,5" >
+            <Canvas Background="Transparent" HorizontalAlignment="Left" Height="477.5" VerticalAlignment="Top" Width="499">
+                <Label x:Name="_lblStoreId" Content="Geeta Super Market" HorizontalAlignment="Left" VerticalAlignment="Top" Width="244.993" FontSize="20" FontWeight="Bold" Foreground="#FF3C4788" Canvas.Left="35" Canvas.Top="44"/>
+                <Label x:Name="_lblDashLine" HorizontalAlignment="Left" Height="34" VerticalAlignment="Top" Width="436.5" Foreground="#c3c3c3" FontWeight="ExtraBold"
+               Content="________________________________________________________________________________________________________________________________________________________________________________" Canvas.Left="32" Canvas.Top="63" />
+                <Label x:Name="_lblTvsId" Content="TVS ID: 123 456 789" HorizontalAlignment="Left" VerticalAlignment="Top" Width="244.993" Foreground="#FFA0A097" FontSize="16" FontWeight="Bold" Canvas.Left="34" Canvas.Top="24"/>
+                <Label x:Name="_lblTitles" Content="Product description                                                   Discount            Select" HorizontalAlignment="Left" VerticalAlignment="Top" Width="425" Foreground="#FF0C0C00" FontWeight="ExtraBold" Canvas.Left="34" Canvas.Top="89.5" Opacity="0.7">
+                    <Label.OpacityMask>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="Black" Offset="0"/>
+                            <GradientStop Color="White" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Label.OpacityMask>
+                </Label>
+                <Button x:Name="_btnCalender"  Style="{StaticResource ImageButtonStyle}" Click="_btnSave_Click" BorderThickness="0" Background="Transparent" Height="43.5" Canvas.Left="345" Canvas.Top="30" Width="123.326">
+                    <Image Name="_btnCalenderImage" Source="/Resources/todayCalender.png" Margin="0,0,0,0" Height="36"/>
+                </Button>
+                <ListView SelectionMode="Multiple" Name="lvDataBinding" Background="Transparent" Height="268" Width="440" MaxWidth="440" 
+                          ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
+                          Canvas.Left="31" Canvas.Top="119.5" BorderThickness="0" BorderBrush="#FFABADB3"
+                          ScrollViewer.CanContentScroll="True" SelectionChanged="lvDataBinding_SelectionChanged" >
+                   <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <Border ClipToBounds="True" BorderThickness="0.5" BorderBrush="White" CornerRadius="15" Background="White" Name="BorderPanel" Height="50" Width="430" Margin="3,2,0,1" >
+                                    <Canvas>
+                                        <TextBlock MouseEnter="TextBlock_MouseEnter" Text="{Binding Name}" Width="230" TextTrimming="None" FontWeight="Bold" FontSize="14" Margin="30,15,0,0" Foreground="#FF9E9E9E" OpacityMask="{x:Null}" Opacity="0.8"  />
+                                        <TextBlock Text="{Binding Amount}" FontWeight="Bold" FontSize="14" Margin="300,15,0,0" />
+                                        <Image Name="_okImage1" Width="34" Height="34" Source="/Resources/ok_Green.png" Margin="380,7,0,0"/>
+                                    </Canvas>
+                                </Border>
+                            </WrapPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.Resources>
+                        <ControlTemplate x:Key="SelectedTemplate" TargetType="ListViewItem">
+                            <Border BorderThickness="0.5" Background="Transparent" BorderBrush="Red" CornerRadius="15" Height="50" Width="430" Margin="3,2,0,1" >
+                                <Canvas>
+                                    <TextBlock Foreground="Red" Text="{Binding Name}" Width="230" TextTrimming="None" FontWeight="Bold" FontSize="14" Margin="30,15,0,0"  />
+                                    <TextBlock Foreground="Red" Text="{Binding Amount}" FontWeight="Bold" FontSize="14" Margin="300,15,0,0" />
+                                    <Image Width="34" Height="34" Source="/Resources/cross_Red.png" Margin="380,7,0,0"/>
+                                </Canvas>
+                            </Border>
+                        </ControlTemplate>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Blue"/>
+                    </ListView.Resources>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="true">
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsSelected" Value="true" />
+                                        <Condition Property="Selector.IsSelectionActive" Value="true" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="Template" Value="{StaticResource SelectedTemplate}" />
+                                </MultiTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+            </Canvas>
+        </Border>
+        <Border ClipToBounds="True" CornerRadius="15" Background="White" Height="90" Width="500" Margin="0,630,0,0" >
+            <Canvas Background="Transparent" HorizontalAlignment="Left" Height="90" VerticalAlignment="Top" Width="499">
+                <Label x:Name="_lblTotalDiscountAmount" Content="₹2369.00" HorizontalAlignment="Left" VerticalAlignment="Top" Width="174.993" Foreground="#4a4a4a" FontSize="36" FontWeight="Bold" Height="52.67" OpacityMask="Black" Canvas.Top="25" Canvas.Left="21"/>
+                <Label x:Name="_lblTotalDiscount" Content="Total discount:" HorizontalAlignment="Left" VerticalAlignment="Top" Width="112.993" Foreground="#FFA0A097" FontSize="14" FontWeight="Bold" Height="26.28" Canvas.Left="20.5" Canvas.Top="12.05"/>
+                <Button x:Name="_btnSave" Style="{StaticResource ImageButtonStyle}" Click="_btnSave_Click" BorderThickness="0" Background="Transparent" Canvas.Left="359" Canvas.Top="25">
+                    <Image Name="_btnSaveImage" Source="/Resources/save_Green.png"  Margin="0,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="131" Height="45"/>
+                </Button>
+            </Canvas>
+        </Border>
+        <Label x:Name="jwweweq" HorizontalAlignment="Left"  Background="#F9F6F6"
+                Width="500" Foreground="#4a4a4a" FontSize="30" OpacityMask="Black" Canvas.Top="0" 
+               Canvas.Left="21" Margin="0,630,0,82"/>
+
+        <Image Name="_bubbleImage" Source="/Resources/bubble-shape3x.png" MouseDown="_bubbleImage_MouseDown" Canvas.Left="359.196" Canvas.Top="1.72" Margin="307,-10.5,1,444.5"/>
+        <Label x:Name="_lbl_lastTxn" Tag="Last transaction" Width="100" Height="30" HorizontalContentAlignment="Center" Margin="353.332,150.42,46.668,539.58">
             <TextBlock Cursor="Hand" TextDecorations="Underline" Text="{Binding Path=Tag,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Label}}}" 
                        Foreground="#FF3C4788" PreviewMouseLeftButtonDown="TextBlock_PreviewMouseLeftButtonDown"  FontSize="12" FontWeight="Bold"/>
         </Label>
-        <Image Name="_okImage" Width="34" Height="34" Source="/Resources/ok_Green.png" Margin="453.999,24,90.001,640" RenderTransformOrigin="0.177,-4.308" />
-        <Image Name="_wifiImage" Width="34" Height="34" Source="/Resources/wifi_Green.png" Margin="521.5,6,24.5,660" />
-        <Image Name="_enterPin" Width="130" Height="82" Source="/Resources/enterPin.png" Margin="406.636,84.089,43.364,533.911" />
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="40" FontSize="26" Margin="403.804,84.086,0,0" TextWrapping="Wrap" Text="123 - 112" TextAlignment="Center" VerticalAlignment="Top" Width="136" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0" Background="{x:Null}" MaxLength="9" MaxLines="1" Foreground="White"/>
-        <TextBox x:Name="textBox1" HorizontalAlignment="Left" Height="40" FontSize="26" Margin="403.804,126.42,0,0" TextWrapping="Wrap" Text="123 - 888" TextAlignment="Center" VerticalAlignment="Top" Width="136" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0" Background="{x:Null}" Foreground="White" MaxLength="9" MaxLines="1"/>
+        <Image Name="_okImage" Width="34" Height="34" Source="/Resources/ok_Green.png" Margin="385.695,23,80.305,663" RenderTransformOrigin="0.177,-4.308" />
+        <Image Name="_wifiImage" Width="34" Height="34" Source="/Resources/wifi_Green.png" Margin="449,2,17,684" />
+        <Image Name="_enterPin" Source="/Resources/enterPin.png" Margin="337,63.086,32.5,572.58" />
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="35.628" FontSize="26" Margin="337,65.086,0,0" TextWrapping="Wrap" Text="123 - 112" TextAlignment="Center" VerticalAlignment="Top" Width="131.5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0" Background="{x:Null}" MaxLength="9" MaxLines="1" Foreground="White" TextChanged="textBox_TextChanged" TabIndex="0" KeyDown="textBox_KeyDown"/>
+        <TextBox x:Name="textBox1" HorizontalAlignment="Left" Height="35.628" FontSize="26" Margin="337,107.792,0,0" TextWrapping="Wrap" Text="123 - 888" TextAlignment="Center" VerticalAlignment="Top" Width="131.5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0" Background="{x:Null}" Foreground="White" MaxLength="9" MaxLines="1" TextChanged="textBox1_TextChanged" TabIndex="1" KeyDown="textBox1_KeyDown"/>
+        <ScrollViewer x:Name="scrollBar"  Visibility="Hidden"  HorizontalAlignment="Left" Margin="479,420.33,0,0"
+                   VerticalAlignment="Top" Height="50" RenderTransformOrigin="0.588,1.012" 
+                   Style="{DynamicResource ResourceKey=FavsScrollViewer}"
+                   Background="#F7F7F7" BorderBrush="#C7C7C7"/>
+
+        <!--<Slider HorizontalAlignment="Left" Margin="10,71,0,0" Name="slider" VerticalAlignment="Top" Width="272" Value="{Binding ElementName=textBox2, Path=Text}" 
+                Minimum="10" Maximum="20"/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,107,0,0" TextWrapping="Wrap" Text="Eminem" VerticalAlignment="Top" Width="272" Height="152" Name="textBlock"
+                   FontSize="{Binding ElementName=slider, Path=Value}"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="10,26,0,0" Name="textBox2" TextWrapping="Wrap" VerticalAlignment="Top" Width="272"
+                 Text="{Binding ElementName=slider, Path=Value}"/>-->
     </Grid>
 </Window>

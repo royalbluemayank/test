@@ -73,6 +73,16 @@ namespace RingRing.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap cross_Red {
+            get {
+                object obj = ResourceManager.GetObject("cross_Red", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap enterPin {
             get {
                 object obj = ResourceManager.GetObject("enterPin", resourceCulture);
@@ -83,9 +93,59 @@ namespace RingRing.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap enterPingrey {
+            get {
+                object obj = ResourceManager.GetObject("enterPingrey", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap exportCsv {
+            get {
+                object obj = ResourceManager.GetObject("exportCsv", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ok_Green {
             get {
                 object obj = ResourceManager.GetObject("ok_Green", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap RingRinglogo {
+            get {
+                object obj = ResourceManager.GetObject("RingRinglogo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap save_Green {
+            get {
+                object obj = ResourceManager.GetObject("save_Green", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap todayCalender {
+            get {
+                object obj = ResourceManager.GetObject("todayCalender", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

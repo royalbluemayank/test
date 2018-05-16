@@ -123,6 +123,16 @@ namespace RingRing.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap redeem_Green {
+            get {
+                object obj = ResourceManager.GetObject("redeem_Green", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap RingRinglogo {
             get {
                 object obj = ResourceManager.GetObject("RingRinglogo", resourceCulture);

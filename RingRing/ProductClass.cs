@@ -12,7 +12,7 @@ namespace RingRing
         private static TimeZoneInfo INDIAN_ZONE = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
         public Product(ProductStatus productstatus = ProductStatus.Pending, string BorderColor = "White", string BackgroundColor = "White", decimal Amount = 0, string Image = "ok_Green")
         {
-            this.productstatus = ProductStatus.Pending;
+            this.productstatus = productstatus;
             this.BorderColor = BorderColor;
             this.BackgroundColor = BackgroundColor;
             this.Amount = Amount;
@@ -21,8 +21,8 @@ namespace RingRing
             this.Applicable = true;
         }
         public ProductStatus productstatus { get; set; }
-        public int Barcode { get; set; }
-        public string Name { get; set; }
+        public String Barcode { get; set; }
+        public string ProductName { get; set; }
         public string Image { get; set; }
         public decimal Amount { get; set; }
         public string BorderColor { get; set; }
@@ -60,52 +60,10 @@ namespace RingRing
         }
         public override string ToString()
         {
-            return this.Barcode + "," + this.Name + "," + this.Amount.ToString("0.00") + "," + this.DateTime;
+            return this.Barcode + "," + this.ProductName + "," + this.Amount.ToString("0.00") + "," + this.DateTime;
         }
     }
-
-    public class Productdummy
-    {
-        private static int ID = -1;
-        private string Datetime;
-        private static TimeZoneInfo INDIAN_ZONE = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
-        public Productdummy(ProductStatus productstatus = ProductStatus.Pending, string BorderColor = "White", string BackgroundColor = "White", decimal Amount = 0.00m, string Image = "ok_Green")
-        {
-            ID++;
-            this.productstatus = ProductStatus.Pending;
-            this.BorderColor = BorderColor;
-            this.BackgroundColor = BackgroundColor;
-            this.Amount = Amount;
-            this.Image = "/Resources/" + Image + ".png";
-            this.DateTime = System.DateTime.Now.ToString();
-            this.Applicable = true;
-        }
-        public ProductStatus productstatus { get; set; }
-        public int Id { get { return ID; } }
-        public int index { get; set; }
-        public string Name { get; set; }
-        public string Image { get; set; }
-        public decimal Amount { get; set; }
-        public string BorderColor { get; set; }
-        public string BackgroundColor { get; set; }
-        public bool Added { get; set; }
-        public bool Applicable { get; set; }
-        public string DateTime
-        {
-            get
-            {
-                return System.Convert.ToDateTime(this.Datetime).ToString("hh:mm tt MMMM dd++ yyyy").Replace("++", "th"); //12:55 PM February 26th 2018
-            }
-            set
-            {
-                this.Datetime = value;
-            }
-        }
-        public override string ToString()
-        {
-            return this.index + " , " + this.Name + " , " + this.Amount;
-        }
-    }
+   
     //public class MainUser
     //{
     //    public MainUser()

@@ -19,8 +19,6 @@ D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\RingRing.csprojResolveAssemblyRe
 D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\Resized.g.cs
 D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Debug\Resized.baml
 D:\git repo\test\RingRing\bin\Debug\RingRing.exe.config
-D:\git repo\test\RingRing\obj\Debug\RingRing.exe
-D:\git repo\test\RingRing\obj\Debug\RingRing.pdb
 D:\git repo\test\RingRing\bin\Debug\RingRing.exe
 D:\git repo\test\RingRing\bin\Debug\RingRing.pdb
 D:\git repo\test\RingRing\obj\Debug\RingRing.csprojResolveAssemblyReference.cache
@@ -32,3 +30,5 @@ D:\git repo\test\RingRing\obj\Debug\MainWindow.baml
 D:\git repo\test\RingRing\obj\Debug\RingRing.g.resources
 D:\git repo\test\RingRing\obj\Debug\RingRing.Properties.Resources.resources
 D:\git repo\test\RingRing\obj\Debug\RingRing.csproj.GenerateResource.Cache
+D:\git repo\test\RingRing\obj\Debug\RingRing.exe
+D:\git repo\test\RingRing\obj\Debug\RingRing.pdb

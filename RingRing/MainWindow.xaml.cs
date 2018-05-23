@@ -17,6 +17,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Linq;
+using gma.System.Windows;
+using System.Diagnostics;
+using System.Windows.Interop;
+using Microsoft.Win32;
 
 namespace RingRing
 {
@@ -27,7 +31,7 @@ namespace RingRing
     {
         List<Productdummy> filleditems;
         ICollectionView view, Txnview;
-        BackgroundWorker m_oWorker;
+        BackgroundWorker m_oWorker, m_oWorkerdemo;
         //private Object thisLock = new Object();
         public bool clicked, sametext = true;
         private bool itemImageClicked, Isbackpressed, loginfailedflag = false;
@@ -36,56 +40,166 @@ namespace RingRing
         String text, previousText = string.Empty, textdash = " - ";
         int caretno = 0;
         Order order;
+        UserActivityHook CaptureHook = null;
+        String BarCodeData = String.Empty;
+        char cforKeyDown = '\0';
+        int _lastKeystroke = DateTime.Now.Millisecond;
+        List<char> _barcode = new List<char>(50);
+        Product product = null;
         public MainWindow()
         {
             InitializeComponent();
+            //this.Topmost = true;
             this.Left = SystemParameters.WorkArea.Width - this.Width - 20;
             this.Top = 5;
-            textBox.Focus();
-            createData();
+            //textBox.Focus();
+            store = new Store("0987654321", "Ali Hyper Market");
+            filleditems = Productdummy.getDummyData;
             _lblStoreName.Content = store.StoreName;
             _lblTvsId.Content = store.fullTvsId;
-            order = new Order("order1");
+            order = new Order("SampleOrder1");
             view = CollectionViewSource.GetDefaultView(order.products);
             lvItems.ItemsSource = view;
-            Txnview = CollectionViewSource.GetDefaultView(filleditems);
-            Txnview.GroupDescriptions.Add(new PropertyGroupDescription("Amount"));
-            //view.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
-            lvTxnHistory.ItemsSource = Txnview;
             _lblHeader.Content = Constants.HeaderProductdescription;
+            StartCapture();
+            m_oWorkerdemo = new BackgroundWorker();
+            m_oWorkerdemo.DoWork += new DoWorkEventHandler(m_oWorkerdemo_DoWork);
+            m_oWorkerdemo.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_oWorkerdemo_RunWorkerCompleted);
+            m_oWorkerdemo.WorkerReportsProgress = true;
+            m_oWorkerdemo.WorkerSupportsCancellation = true;
         }
-        public void createData()
+        private void StartCapture()
         {
-            //totalitems = new List<Product>();
-            //removedproductfromCart = new List<Product>();
-            filleditems = new List<Productdummy>();
-            store = new Store("0987654321", "Ali Hyper Market");
-            filleditems.Add(new Productdummy() { index = 1100, Name = "Colgate Toothpaste Visible White", Amount = 2.51m });
-            filleditems.Add(new Productdummy() { index = 1101, Name = "Bornvita Chocolate", Amount = 0.50m });
-            filleditems.Add(new Productdummy() { index = 1102, Name = "Nescafe Sachet", Amount = 2.00m });
-            filleditems.Add(new Productdummy() { index = 1103, Name = "Nescafe Sachet", Amount = 1.00m });
-            filleditems.Add(new Productdummy() { index = 1104, Name = "Jelly Belly", Amount = 2.00m });
-            filleditems.Add(new Productdummy() { index = 1105, Name = "Mother Dairy Ghee", Amount = 39.00m });
-            filleditems.Add(new Productdummy() { index = 1106, Name = "Britannia Bourbon Cream Biscuit", Amount = 13.76m });
-            filleditems.Add(new Productdummy() { index = 1107, Name = "Colgate Toothpaste Visible White 100 gm pack", Amount = 124222.90m });
-            filleditems.Add(new Productdummy() { index = 1108, Name = "Bornvita Chocolate", Amount = 39.19m });
-            filleditems.Add(new Productdummy() { index = 1109, Name = "Nescafe Sachet", Amount = 13.09m });
-            filleditems.Add(new Productdummy() { index = 1110, Name = "Jelly Belly", Amount = 2.00m });
-            filleditems.Add(new Productdummy() { index = 1111, Name = "Mother Dairy Ghee", Amount = 39.00m });
-            filleditems.Add(new Productdummy() { index = 1112, Name = "Britannia Bourbon Cream Biscuit", Amount = 13.76m });
-            //items.Add(new User() { index = 0, Name = "Colgate Toothpaste Visible White", Amount = "2.40" });
-            //items.Add(new User() { index = 1, Name = "Bornvita Chocolate", Amount = "Pending" });
-            //items.Add(new User() { index = 2, Name = "Nescafe Sachet", Amount = "Pending" });
-            //items.Add(new User() { index = 3, Name = "Nescafe Sachet", Amount = "Pending" });
-            //items.Add(new User() { index = 4, Name = "Jelly Belly", Amount = "Pending" });
-            //items.Add(new User() { index = 5, Name = "Mother Dairy Ghee", Amount = "Pending" });
-            //items.Add(new User() { index = 6, Name = "Britannia Bourbon Cream Biscuit", Amount = "Pending" });
-            //items.Add(new User() { index = 7, Name = "Colgate Toothpaste Visible White", Amount = "Pending" });
-            //items.Add(new User() { index = 8, Name = "Bornvita Chocolate", Amount = "Pending" });
-            //items.Add(new User() { index = 9, Name = "Nescafe Sachet", Amount = "Pending" });
-            //items.Add(new User() { index = 10, Name = "Jelly Belly", Amount = "Pending" });
-            //items.Add(new User() { index = 11, Name = "Mother Dairy Ghee", Amount = "Pending" });
-            //items.Add(new User() { index = 12, Name = "Britannia Bourbon Cream Biscuit", Amount = "Pending" });
+            try
+            {
+                CaptureHook = new UserActivityHook();
+                CaptureHook.KeyPress += new System.Windows.Forms.KeyPressEventHandler(MyKeyPress);
+                CaptureHook.KeyDown += new System.Windows.Forms.KeyEventHandler(MyKeydown);
+                CaptureHook.KeyUp += new System.Windows.Forms.KeyEventHandler(MyKeyUp);
+                CaptureHook.Start();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.Message);
+            }
+        }
+
+        bool AppendBarcode = false;
+        public void MyKeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        {
+            //Console.WriteLine("MyKeyPress bool : " + AppendBarcode);
+            if (AppendBarcode)
+            {
+                if (e.KeyChar != 13)
+                    _barcode.Add((char)e.KeyChar);
+                //Console.WriteLine("AppendBarcode : " + (char)e.KeyChar);
+                //Console.WriteLine("_barcode : " + new String(_barcode.ToArray()));
+            }
+            if (e.KeyChar == 13 && _barcode.Count > 0)
+            {
+                //Console.WriteLine("_barcode.Count " + _barcode.Count);
+                string BarCodeData = string.Empty;
+                if (Console.CapsLock == true)
+                    BarCodeData = changeCase(_barcode.ToArray());
+                else
+                    BarCodeData = new String(_barcode.ToArray());
+                //Console.WriteLine(String.Format("{0}{1}{2}", "[", BarCodeData, "]"));
+                product = new Product() { Barcode = BarCodeData, ProductName = BarCodeData, productstatus = ProductStatus.Updated };
+                order.Add(product);
+                if (canvasUserInfo.Visibility == Visibility.Visible)
+                {
+                    canvasUserInfo.Visibility = Visibility.Hidden;
+                    canvasCoupanDisplay.Visibility = Visibility.Visible;
+                }
+                //lvItems.Items.MoveCurrentToLast();
+                //m_oWorkerdemo.RunWorkerAsync(product);
+                view.Refresh();
+                _barcode.Clear();
+            }
+            _lastKeystroke = DateTime.Now.Millisecond;
+            //cforKeyDown = (char)e.KeyChar;
+            //Console.WriteLine("MyKeyPress : " + (int)e.KeyChar);
+        }
+
+        private string changeCase(char[] barcodeData)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in barcodeData)
+            {
+                if (Char.IsLower(c))
+                    sb.Append(c.ToString().ToUpper());
+                else if (char.IsUpper(c))
+                    sb.Append(c.ToString().ToLower());
+                else
+                    sb.Append(c.ToString());
+            }
+            return sb.ToString();
+        }
+
+        public void MyKeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            //Console.WriteLine("MyKeyUp : " + (int)e.KeyCode);
+            //Console.WriteLine("cforKeyDown : " + cforKeyDown);
+            if (e.KeyData == System.Windows.Forms.Keys.LShiftKey || e.KeyData == System.Windows.Forms.Keys.RShiftKey ||
+                     e.KeyData == System.Windows.Forms.Keys.ShiftKey || e.KeyData == System.Windows.Forms.Keys.Shift)
+            {
+                return;
+            }
+            if (cforKeyDown != (char)e.KeyCode || cforKeyDown == '\0')
+            {
+                //Console.WriteLine("cforKeyDown : MyKeyUp =>" + (int)cforKeyDown + " : " + (int)e.KeyCode);
+                //Console.WriteLine("MyKeyUp bool : " + AppendBarcode);
+                cforKeyDown = '\0';
+                _barcode.Clear();
+                AppendBarcode = false;
+                return;
+            }
+            AppendBarcode = true;
+            int elapsed = (DateTime.Now.Millisecond - _lastKeystroke);
+            if (elapsed > 20)
+            {
+                Console.WriteLine("_barcode.Clear();" + elapsed);
+                AppendBarcode = false;
+                _barcode.Clear();
+            }
+            //if(e.KeyCode == System.Windows.Forms.Keys.Return)
+            //{
+            //    AppendBarcode = false;
+            //    //_barcode.Add((char)e.KeyData);
+            //}
+        }
+
+        private void m_oWorkerdemo_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            updateCart();
+            view.Refresh();
+            Console.WriteLine("m_oWorkerdemo_RunWorkerCompleted : lvItems.count " + lvItems.Items.Count);
+        }
+
+        private void m_oWorkerdemo_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Console.WriteLine("m_oWorkerdemo_DoWork");
+        }
+
+        public void MyKeydown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            AppendBarcode = true;
+            _lastKeystroke = DateTime.Now.Millisecond;
+            if (e.KeyData == System.Windows.Forms.Keys.LShiftKey || e.KeyData == System.Windows.Forms.Keys.RShiftKey ||
+                     e.KeyData == System.Windows.Forms.Keys.ShiftKey || e.KeyData == System.Windows.Forms.Keys.Shift)
+            {
+                return;
+            }
+            else if (e.KeyData == System.Windows.Forms.Keys.Capital || e.KeyData == System.Windows.Forms.Keys.CapsLock)
+            {
+                return;
+            }
+            cforKeyDown = ((char)e.KeyCode);
+            //Console.WriteLine("MyKeydown : " + (int)e.KeyData);
+        }
+        private void ButtonStopClick(object sender, System.EventArgs e)
+        {
+            CaptureHook.Stop();
         }
         private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -212,32 +326,6 @@ namespace RingRing
             {
                 sametext = true;
             }
-            //if (textchange)
-            //{
-            //textchange = false;
-            //if (!Isbackpressed && !justpressed)
-            //{
-            //    textBox.SelectionStart = textBox.Text.Length; // add some logic if length is 0
-            //    textBox.SelectionLength = 0;
-            //    justpressed = false;
-            //}
-            //else if (!Isbackpressed && justpressed)
-            //{
-            //    textBox.SelectionStart = selectionstart; // add some logic if length is 0
-            //    textBox.SelectionLength = 0;
-            //    justpressed = false;
-            //}
-            //else
-            //{
-            //    textBox.SelectionStart = selectionstart;
-            //    textBox.SelectionLength = 0;
-            //    Isbackpressed = false;
-            //    justpressed = true;
-            //}
-            //else
-            //{
-            //    textchange = true;
-            //}
         }
         private void LoginSuccess()
         {
@@ -252,9 +340,7 @@ namespace RingRing
             loginfailedflag = true;
             _enterPin.Source = new BitmapImage(new Uri(@"pack://application:,,,/Resources/enterPingrey.png", UriKind.Absolute));
         }
-        private void textBox_KeyDown(object sender, KeyEventArgs e)
-        {
-        }
+        private void textBox_KeyDown(object sender, KeyEventArgs e) { }
         private void _okImage1_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Product product = ((Product)((Image)sender).DataContext);
@@ -291,143 +377,6 @@ namespace RingRing
             updateCart();
             view.Refresh();
         }
-
-        //Console.WriteLine("-------------------------------------------------------------------------------");
-        //Console.WriteLine("lvItems_SelectionChanged fired : {0} ", true);
-
-        //Console.WriteLine("e.AddedItems.Count : {0} ", e.AddedItems.Count);
-        //removedproductfromCart.Add(product);
-        //Console.WriteLine("removedproductfromCart.Add(product) : {0} ", product.ToString());
-
-        //Console.WriteLine("e.RemovedItems.Count : {0} ", e.RemovedItems.Count);
-
-        //for (int i = 0; i < order.Rejectedproducts.Count; i++) //int i = 0; i < removedproductfromCart.Count; i++
-        //{
-        //    if (product.Barcode == order.Rejectedproducts[i].Barcode)  //product.Barcode == removedproductfromCart[i].Barcode
-        //    {
-        //        //Console.WriteLine("removedproductfromCart.Remove(product) : {0} ", product.ToString());
-        //        if (itemImageClicked && product.Addedinremovedproduct)
-        //        {
-        //            if (order.products.Where(item => item.Barcode == product.Barcode).Count() == 1)
-        //            {
-        //                order.Delete(product);
-        //                view.Refresh();
-        //                itemImageClicked = false;
-        //                return;
-        //            }
-        //            //foreach (var item in order.products)
-        //            //{
-        //            //    if (item.Barcode == product.Barcode)
-        //            //    {
-        //            //        order.Delete(product);
-        //            //        order.products.Remove(product);
-        //            //        //order.products.RemoveAt(order.products.IndexOf(item));
-        //            //       //Console.WriteLine("deleted item : {0} ", product.ToString());
-        //            //        view.Refresh();
-        //            //        itemImageClicked = false;
-        //            //        return;
-        //            //    }
-        //            //}
-        //        }
-        //        order.Add(product);                                    //removedproductfromCart.RemoveAt(i);
-        //        break;
-        //    }
-        //}
-        //changeselection(product);
-        //itemImageClicked = false;
-        //Console.WriteLine("removedproductfromCart.Count : {0}", order.Rejectedproducts.Count);
-        //Console.WriteLine("totalitems.Count : {0}", order.products.Count);
-        //Console.WriteLine("totaldiscountedAmount : {0}", order.GettotalAmount);
-        //Console.WriteLine("-------------------------------------------------------------------------------");
-
-        //if (e.AddedItems.Count != 0)
-        //{
-        //    Product u = e.AddedItems[0] as Product;
-        //    selecteditems.Add(u);
-        //    if (u.productstatus == ProductStatus.Updated && !u.Added)
-        //        removedProductAmount = Convert.ToDecimal(u.Amount);
-        //    changeselection(u);
-        //}
-        //if (e.RemovedItems.Count != 0)
-        //{
-        //    for (int i = 0; i < selecteditems.Count; i++)
-        //    {
-        //        Product u = (Product)e.RemovedItems[0];
-        //        if (u.index == selecteditems[i].index)
-        //        {
-        //            if (u.productstatus == ProductStatus.Updated && u.Added)
-        //                removedProductAmount = -Convert.ToDecimal(u.Amount);
-        //            changeselection(u);
-        //            selecteditems.RemoveAt(i);
-        //            break;
-        //        }
-        //    }
-        //}
-        //private void changeselection(Product product)
-        //{
-        //   //Console.WriteLine("changeselection start: {0}", product.ToString());
-        //    if (product.Addedinremovedproduct)
-        //    {
-        //        product.Added();
-        //        ////if (product.productstatus != ProductStatus.Pending)
-        //        ////{
-        //        ////    updateCart();
-        //        ////    //Console.WriteLine("before totaldiscountedAmount: {0}", totaldiscountedAmount);
-        //        ////    //totaldiscountedAmount += product.Amount;
-        //        ////    //Console.WriteLine("changeselection totaldiscountedAmount: {0}", product.Amount);
-        //        ////    //Console.WriteLine("after totaldiscountedAmount: {0}", totaldiscountedAmount);
-        //        ////}
-        //    }
-        //    else
-        //    {
-        //        product.Removed();
-        //        ////if (product.productstatus != ProductStatus.Pending) {
-        //        ////    updateCart();
-        //        ////    //Console.WriteLine("before totaldiscountedAmount: {0}", totaldiscountedAmount);
-        //        ////    //totaldiscountedAmount -= product.Amount;
-        //        ////    //Console.WriteLine("changeselection totaldiscountedAmount: {0}", product.Amount);
-        //        ////    //Console.WriteLine("after totaldiscountedAmount: {0}", totaldiscountedAmount);
-        //        ////}
-        //    }
-        //   //Console.WriteLine("changeselection stop: {0}", product.ToString());
-           
-        //}
-        private void _btn_AddItem_Click(object sender, RoutedEventArgs e)
-        {
-            if (!UserInfo.Islogin)
-            {
-                System.Windows.Forms.MessageBox.Show("Please login");
-                return;
-            }
-            if (value == -1)
-            {
-                canvasUserInfo.Visibility = Visibility.Hidden;
-                canvasCoupanDisplay.Visibility = Visibility.Visible;
-            }
-            if (value++ == filleditems.Count - 1)
-            {
-                if (System.Windows.Forms.MessageBox.Show("reload Items as filled items list is empty", "Refill items", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
-                {
-                    value = 0;
-                    Order.Clean(ref order);
-                    order = new Order("order1");
-                    view = CollectionViewSource.GetDefaultView(order.products);
-                    lvItems.ItemsSource = view;
-                }
-                else
-                {
-                    return;
-                }
-            }
-
-            //order.Add(new Product() { Barcode = value, Name = filleditems[value].Name });
-            //Order o = new Order("1", p);
-            //o.Delete(p);
-            //p.Barcode = 12;
-            //o.Delete(p);
-            //Order.Clean(ref o);
-            startWorkerProcess(new Product() { Barcode = 1100 + value, Name = filleditems[value].Name });
-        }
         private void TextBlock_NextCustomer(object sender, MouseButtonEventArgs e)
         {
             if (lvItems.Visibility == Visibility.Visible)
@@ -443,7 +392,6 @@ namespace RingRing
                 lvTxnHistory.Visibility = Visibility.Hidden;
             }
         }
-
         private void _lbl_editorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (BorderTransactionPanel.Visibility == Visibility.Visible)
@@ -451,12 +399,28 @@ namespace RingRing
             else
                 BorderTransactionPanel.Visibility = Visibility.Visible;
         }
-
         private void _btnRedeem_Click(object sender, RoutedEventArgs e)
         {
+            //System.Windows.Forms.MessageBox.Show("Order is Closed now.!!");
+            order.Close(ref order);
 
+            OrderHistory oh0 = new OrderHistory(order.OrderNumber, order.GettotalAmount, DateTime.Now.ToString());
+            //OrderHistory oh1 = new OrderHistory("or1", order.GettotalAmount + 1, DateTime.Now.AddHours(2).ToString());
+            foreach (var item in order.products)
+            {
+                oh0.products.Add(new OrderProduct() { ProductAmount = item.Amount, ProductBarcode = item.Barcode, ProductName = item.ProductName });
+                //oh1.products.Add(new OrderProduct() { ProductAmount = item.Amount, ProductBarcode = item.Barcode, ProductName = item.ProductName });
+            }
+
+            Store.Orders.Add(oh0);
+            lvItems.Visibility = Visibility.Hidden;
+            _lblHeader.Content = Constants.HeaderTxndescription;
+            lvTxnHistory.Visibility = Visibility.Visible;
+            _btnSave.Visibility = Visibility.Visible;
+            Txnview = CollectionViewSource.GetDefaultView(Store.Orders);
+            Txnview.GroupDescriptions.Add(new PropertyGroupDescription("OrderAmount"));
+            lvTxnHistory.ItemsSource = Txnview;
         }
-
         private void _btnSave_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.FolderBrowserDialog fd = new System.Windows.Forms.FolderBrowserDialog();
@@ -464,7 +428,8 @@ namespace RingRing
             {
                 if (Directory.Exists(fd.SelectedPath.Trim()))
                 {
-                    if (!order.SaveData(fd.SelectedPath.Trim())) {
+                    if (!order.SaveData(fd.SelectedPath.Trim()))
+                    {
                         System.Windows.Forms.MessageBox.Show("Error occured while saving");
                     }
                 }
@@ -500,9 +465,7 @@ namespace RingRing
             {
                 // StatusTextBox.Text = "Task Cancelled.";
             }
-
             // Check to see if an error occurred in the background process.
-
             else if (e.Error != null)
             {
                 //StatusTextBox.Text = "Error while performing background operation.";
@@ -512,15 +475,6 @@ namespace RingRing
                 updateCart();
             }
             view.Refresh();
-            //lvItems.SelectedItems.Add(selecteditems);
-
-            //lvItems.Focus();
-
-
-            // lvItems.Items.DeferRefresh();
-            //_lblTotalDiscountAmount.Content = "₹" + totalAmount;
-            // Everything completed normally.
-            //StatusTextBox.Text = "Task Completed...";
         }
         private void m_oWorker_DoWork(object sender, DoWorkEventArgs e)
         {
@@ -528,7 +482,7 @@ namespace RingRing
             for (int i = 0; i < filleditems.Count; i++)
             {
                 Thread.Sleep(1000);
-                if (product.Barcode == filleditems[i].index)
+                if (product.Barcode == filleditems[i].Barcode)
                 {
                     product.Amount = filleditems[i].Amount;
                     if (product.productstatus == ProductStatus.Pending)
@@ -536,42 +490,19 @@ namespace RingRing
                         product.productstatus = ProductStatus.Updated;
                         if (product.productstatus != ProductStatus.Pending && !product.Addedinremovedproduct)
                         {
+                            product.ProductName = filleditems.Single(data => data.Barcode == product.Barcode).ProductName;
                             if (i == 3)
                             {
                                 product.Applicable = false;
                                 product.Amount = -1.00m;
                                 order.Remove(product);
-                                //changeselection(product);
                             }
-                            //totaldiscountedAmount += product.Amount;
-                            //Console.WriteLine("m_oWorker_DoWork totaldiscountedAmount stop: {0} - {1}", product.ToString(), product.Amount);
                         }
-                        //changeselection(product);  // added mayank
-                        //if (!product.Addedinremovedproduct)   // commented mayank
-                        //totaldiscountedAmount += Convert.ToDecimal(product.Amount); commented mayank
                     }
+                    e.Result = product;
                     break;
                 }
-                //m_oWorker.ReportProgress(i, user);
-                //if (m_oWorker.CancellationPending)
-                //{
-                //    e.Cancel = true;
-                //    //m_oWorker.ReportProgress(0);
-                //    return;
-                //}
             }
-            //m_oWorker.ReportProgress(100);
         }
-        //private void m_oWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        //{
-        //    lock (thisLock)
-        //    {
-        //        product product = (User)e.UserState;
-        //        //if (product != null)
-        //        //  ContainerPanel.Controls.Add(new Label { Text = oEmp.Name });
-        //        //ListBox1.Items.Add(new ListBoxItem { Content = oEmp.Name + " item added" + e.ProgressPercentage.ToString() + "%" });
-        //        //StatusTextBox.Text = "Processing......" + e.ProgressPercentage.ToString() + "%";
-        //    }
-        //}
     }
 }

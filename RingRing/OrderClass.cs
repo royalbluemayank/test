@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,12 +18,12 @@ namespace RingRing
         public Order(String OrderNumber)
         {
             this.OrderNumber = OrderNumber;
-            products = new List<Product>();
+            products = new ObservableCollection<Product>();
             Rejectedproducts = new List<Product>();
         }
-        public List<Product> products
+        public ObservableCollection<Product> products
         {
-            get; private set;
+            get; set;
         }
         public List<Product> Rejectedproducts
         {
@@ -72,11 +73,11 @@ namespace RingRing
         {
             get { return products.Count - Rejectedproducts.Count; }
         }
-        internal static void Clean(ref Order o)
+        public static void Clean(ref Order o)
         {
             o = null;
         }
-        internal bool SaveData(string filepath)
+        public bool SaveData(string filepath)
         {
             try
             {
@@ -88,7 +89,7 @@ namespace RingRing
                         sw.WriteLine(FileHeadersAllTxn);
                     }
                     StringBuilder sb = new StringBuilder();
-                    int i = 0;
+                    int i = 1;
                     foreach (Product item in products.Where(e => !e.Addedinremovedproduct && e.Applicable))
                     {
                         sb.AppendLine(String.Format("{0},{1}", i++, item.ToString()));
@@ -106,7 +107,33 @@ namespace RingRing
                 return false;
             }
         }
-       
+        public static bool SaveItem(Product product)
+        {
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(File.Open(Constants.PathforSaveItem, FileMode.Append)))
+                {
+                    if (new FileInfo(Constants.PathforSaveItem).Length == 0)
+                    {
+                        sw.WriteLine(FileHeadersAllTxn);
+                    }
+                    sw.WriteLine(String.Format("{0}", product.ToString()));
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.StackTrace);
+                return false;
+            }
+        }
+        public void Close(ref Order order)
+        {
+            //SaveData(".");
+            //AllOrders.Add(order);
+        }
+        
+
         //public static int GetUnitCount()
         //{
         //    //return Order.Products.Select(x => x.Quantity).Sum();

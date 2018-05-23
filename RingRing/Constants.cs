@@ -7,7 +7,8 @@ namespace RingRing
 {
     class Constants
     {
-        public static string HeaderProductdescription= "Product description                                                Discount            Select";
-        public static string HeaderTxndescription =    "Product description                                                                      Discount";
+        public static string HeaderProductdescription = "Product description                                                Discount            Select";
+        public static string HeaderTxndescription = "Product description                                                                      Discount";
+        public static string PathforSaveItem { get { return "ItemHistory.csv"; } }
     }
 }

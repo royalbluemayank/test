@@ -6,10 +6,10 @@ namespace RingRing
     {
         Pending = 0, Updated = 1
     }
-    public class Product
+    public class Product: OrderHistory.Product
     {
         private string Datetime;
-        private static TimeZoneInfo INDIAN_ZONE = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+        //private static TimeZoneInfo INDIAN_ZONE = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
         public Product(ProductStatus productstatus = ProductStatus.Pending, string BorderColor = "White", string BackgroundColor = "White", decimal Amount = 0, string Image = "ok_Green")
         {
             this.productstatus = productstatus;
@@ -21,19 +21,27 @@ namespace RingRing
             this.Applicable = true;
         }
         public ProductStatus productstatus { get; set; }
-        public String Barcode { get; set; }
-        public string ProductName { get; set; }
+        //public String Barcode { get; set; }
+
+        //public string ProductName { get; set; }
         public string Image { get; set; }
-        public decimal Amount { get; set; }
+
+        //public decimal Amount { get; set; }
         public string BorderColor { get; set; }
         public bool Applicable { get; set; }
         public string BackgroundColor { get; set; }
-        public bool Addedinremovedproduct { get; set; }
+        public bool Addedinremovedproduct
+        {
+            get; set;
+        }
         public string DateTime
         {
             get
             {
-                return System.Convert.ToDateTime(this.Datetime).ToString("hh:mm tt MMMM dd++ yyyy").Replace("++", "th"); //12:55 PM February 26th 2018
+                DateTime dt = Convert.ToDateTime(this.Datetime);
+                return string.Format("{0:hh:mm tt MMMM dd}{1} {0:yyyy}", dt, ((dt.Day % 10 == 1 && dt.Day != 11) ? "st" : (dt.Day % 10 == 2 && dt.Day != 12) ? "nd"
+                                                                                                                        : (dt.Day % 10 == 3 && dt.Day != 13) ? "rd" : "th"));
+                //return System.Convert.ToDateTime(this.Datetime).ToString("hh:mm tt MMMM dd++ yyyy").Replace("++", "th"); //12:55 PM February 26th 2018
             }
             set
             {

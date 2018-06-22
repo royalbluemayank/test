@@ -5,19 +5,22 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace RingRing
 {
     public class Order
     {
-        //private static List<Product> products;
         public readonly string OrderNumber = string.Empty;
-
         public static bool IsOrderAnonymous = false;
+        private string Datetime;
+        private static string FileStartText { get { return "{\"JsonData\":["; } }
+        private static string FileEndText { get { return "]}"; } }
         private static string FileHeadersAllTxn { get { return "SNo,Product,Name,Amount,DateTime"; } }
         public Order(String OrderNumber)
         {
             this.OrderNumber = OrderNumber;
+            this.DateTime = System.DateTime.Now.ToString();
             products = new ObservableCollection<Product>();
             Rejectedproducts = new List<Product>();
         }
@@ -31,19 +34,16 @@ namespace RingRing
         }
         public void Add(Product product)
         {
-            if (!products.Contains(product)){
+            if (!products.Contains(product))
+            {
                 products.Add(product);
             }
-            else if (Rejectedproducts.Contains(product)){
+            else if (Rejectedproducts.Contains(product))
+            {
                 Rejectedproducts.Remove(product);
             }
             product.Added();
         }
-
-        //public void Edit(Product product)
-        //{
-        //    products.Add(product);
-        //}
         public void Remove(Product product)
         {
             if (products.Contains(product))
@@ -73,6 +73,20 @@ namespace RingRing
         {
             get { return products.Count - Rejectedproducts.Count; }
         }
+        public string DateTime
+        {
+            get
+            {
+                DateTime dt = Convert.ToDateTime(this.Datetime);
+                return string.Format("{0:hh:mm:ss tt MMMM dd}{1} {0:yyyy}", dt, ((dt.Day % 10 == 1 && dt.Day != 11) ? "st" : (dt.Day % 10 == 2 && dt.Day != 12) ? "nd"
+                                                                                                                        : (dt.Day % 10 == 3 && dt.Day != 13) ? "rd" : "th"));
+                //return Convert.ToDateTime(this.Datetime).ToString("hh:mm tt MMMM dd++ yyyy").Replace("++", "th"); //12:55 PM February 26th 2018
+            }
+            private set
+            {
+                this.Datetime = value;
+            }
+        }
         public static void Clean(ref Order o)
         {
             o = null;
@@ -98,12 +112,12 @@ namespace RingRing
                     sw.WriteLine(sb);
                 }
                 Process.Start(filepath);
-                System.Windows.Forms.MessageBox.Show("file saved.!!");
+                MessageBox.Show("file saved.!!");
                 return true;
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(ex.StackTrace);
+                MessageBox.Show(ex.StackTrace);
                 return false;
             }
         }
@@ -123,17 +137,89 @@ namespace RingRing
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(ex.StackTrace);
+                MessageBox.Show(ex.StackTrace);
                 return false;
             }
         }
-        public void Close(ref Order order)
+        public static bool SaveAnonymousItem(OrderHistory.Product product)
         {
+            Console.WriteLine("SaveAnonymousItem");
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(File.Open(Constants.PathforSaveItem, FileMode.Append)))
+                {
+                    Debug.WriteLine("Constants.PathforSaveItem");
+                    sw.Write(String.Format("{0},", product.ToJson()));
+                    Debug.WriteLine(String.Format("{0},", product.ToJson()));
+                }
+                SendAnonymousList();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.StackTrace);
+                return false;
+            }
+        }
+        public static void Logger(String logs)
+        {
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(File.Open(Constants.Pathforlogger, FileMode.Append)))
+                {
+                    sw.WriteLine(String.Format("[ {0} ] ------ {1}", System.DateTime.Now.ToString("yyyy MMMM dd hh:mm:ss tt"),logs));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.StackTrace);
+            }
+        }
+        public static bool SendAnonymousList()
+        {
+            try
+            {
+                Debug.WriteLine("SendAnonymousList");
+                String Data = File.ReadAllText(Constants.PathforSaveItem); ;
+                Debug.WriteLine("Data : " + Data);
+                int count = Data.Count(character => character == '}');
+                Debug.WriteLine("count : " + count);
+                if (count > 50)
+                {
+                    Data = Data.Substring(0, Data.Length - 1);
+                    Data = FileStartText + Data + FileEndText;
+                    //File.Delete(Constants.PathforSaveItem);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.StackTrace);
+            }
+            return false;
+        }
+        public static void Close(ref Order order)
+        {
+            order = null;
             //SaveData(".");
             //AllOrders.Add(order);
         }
-        
 
+        public class UserInfo
+        {
+            public UserInfo(string Name, string PhoneNo)
+            {
+                this.Name = Name;
+                this.PhoneNo = PhoneNo;
+            }
+            public string Name { get; }
+            public string PhoneNo { get; }
+        }
+        //public void Edit(Product product)
+        //{
+        //    products.Add(product);
+        //}
+        //private static List<Product> products;
         //public static int GetUnitCount()
         //{
         //    //return Order.Products.Select(x => x.Quantity).Sum();

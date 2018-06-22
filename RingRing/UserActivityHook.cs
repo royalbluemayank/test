@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Reflection;
-using System.Threading;
-using System.Windows.Forms;
 using System.ComponentModel;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
-namespace gma.System.Windows
+namespace RingRing
 {
     /// <summary>
     /// This class allows you to tap keyboard to detect their activity even when an 

@@ -63,16 +63,6 @@ namespace RingRing.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap backImage {
-            get {
-                object obj = ResourceManager.GetObject("backImage", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap bubble_shape3x {
             get {
                 object obj = ResourceManager.GetObject("bubble_shape3x", resourceCulture);
@@ -116,16 +106,6 @@ namespace RingRing.Properties {
         internal static System.Drawing.Bitmap exportCsv {
             get {
                 object obj = ResourceManager.GetObject("exportCsv", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap FinishandCopy_Green {
-            get {
-                object obj = ResourceManager.GetObject("FinishandCopy_Green", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.ObjectModel;
 
 namespace RingRing
@@ -59,7 +60,7 @@ namespace RingRing
         //private string Datetime;
         public string OrderNumber { get; }
         public decimal OrderAmount { get; }
-        public string DateTime 
+        public string DateTime
         {
             get; private set;
             //get
@@ -78,7 +79,7 @@ namespace RingRing
         {
             get; set;
         }
-        public OrderHistory(string OrderNumber, decimal OrderAmount, string OrderDateTime )
+        public OrderHistory(string OrderNumber, decimal OrderAmount, string OrderDateTime)
         {
             this.OrderNumber = OrderNumber;
             this.OrderAmount = OrderAmount;
@@ -87,6 +88,7 @@ namespace RingRing
         }
         public class Product
         {
+            public string ProductID { get; set; }
             public string Barcode { get; set; }
             public string ProductName { get; set; }
             public decimal Amount { get; set; }
@@ -96,6 +98,5 @@ namespace RingRing
                 return "{\"ProductBarcode\":\"" + this.Barcode + "\",\"TimeStamp\":\"" + System.DateTime.Now.ToString("MM/dd/yyyy H:mm:ss:ffff zzz") + "\"}"; //yyyyMMddHHmmssffff
             }
         }
-
     }
 }

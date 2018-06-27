@@ -27,21 +27,21 @@ namespace RingRing
         {
             InitializeComponent();
             order = new Order("SampleOrder1");
-            order.Add(new Product() { ProductName = "Complete this WPF tutorial", Barcode = "45" });
-            order.Add(new Product() { ProductName = "Learn C#", Barcode = "80" });
-            order.Add(new Product() { ProductName = "Wash the car", Barcode = "0" });
-            order.Add(new Product() { ProductName = "Complete this WPF tutorial", Barcode = "45" });
-            order.Add(new Product() { ProductName = "Learn C#", Barcode = "80" });
-            order.Add(new Product() { ProductName = "Wash the car", Barcode = "0" });
-            order.Add(new Product() { ProductName = "Complete this WPF tutorial", Barcode = "45" });
-            order.Add(new Product() { ProductName = "Learn C#", Barcode = "80" });
-            order.Add(new Product() { ProductName = "Wash the car", Barcode = "0" });
-            order.Add(new Product() { ProductName = "Complete this WPF tutorial", Barcode = "45" });
-            order.Add(new Product() { ProductName = "Learn C#", Barcode = "80" });
-            order.Add(new Product() { ProductName = "Wash the car", Barcode = "0" });
-            order.Add(new Product() { ProductName = "Complete this WPF tutorial", Barcode = "45" });
-            order.Add(new Product() { ProductName = "Learn C#", Barcode = "80" });
-            order.Add(new Product() { ProductName = "Wash the car", Barcode = "0" });
+            order.AddProduct(new Product() { ProductName = "Complete this WPF tutorial", Barcode = "45" });
+            order.AddProduct(new Product() { ProductName = "Learn C#", Barcode = "80" });
+            order.AddProduct(new Product() { ProductName = "Wash the car", Barcode = "0" });
+            order.AddProduct(new Product() { ProductName = "Complete this WPF tutorial", Barcode = "45" });
+            order.AddProduct(new Product() { ProductName = "Learn C#", Barcode = "80" });
+            order.AddProduct(new Product() { ProductName = "Wash the car", Barcode = "0" });
+            order.AddProduct(new Product() { ProductName = "Complete this WPF tutorial", Barcode = "45" });
+            order.AddProduct(new Product() { ProductName = "Learn C#", Barcode = "80" });
+            order.AddProduct(new Product() { ProductName = "Wash the car", Barcode = "0" });
+            order.AddProduct(new Product() { ProductName = "Complete this WPF tutorial", Barcode = "45" });
+            order.AddProduct(new Product() { ProductName = "Learn C#", Barcode = "80" });
+            order.AddProduct(new Product() { ProductName = "Wash the car", Barcode = "0" });
+            order.AddProduct(new Product() { ProductName = "Complete this WPF tutorial", Barcode = "45" });
+            order.AddProduct(new Product() { ProductName = "Learn C#", Barcode = "80" });
+            order.AddProduct(new Product() { ProductName = "Wash the car", Barcode = "0" });
             view = CollectionViewSource.GetDefaultView(order.products);
             icTodoList.ItemsSource = view;
 
@@ -107,14 +107,14 @@ namespace RingRing
 
         private void _okImage1_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Product product = ((Product)((Image)sender).DataContext);
-            if (!product.Applicable || product.Addedinremovedproduct)
-            {
-                itemImageClicked = true;
-                order.Delete(product);
-                view.Refresh();
-                return;
-            }
+            //Product product = ((Product)((Image)sender).DataContext);
+            //if (!product.Applicable || product.Addedinremovedproduct)
+            //{
+            //    itemImageClicked = true;
+            //    order.Delete(product);
+            //    view.Refresh();
+            //    return;
+            //}
         }
 
         private void innercanvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -128,11 +128,11 @@ namespace RingRing
             if (!product.Applicable) return;
             if (!product.Addedinremovedproduct)
             {
-                order.Remove(product);
+                order.RemoveProduct(product);
             }
             else
             {
-                order.Add(product);
+                order.AddProduct(product);
             }
             view.Refresh();
             //if (e.AddedItems.Count != 0)

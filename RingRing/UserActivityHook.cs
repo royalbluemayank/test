@@ -282,16 +282,7 @@ namespace RingRing
         private const byte VK_NUMLOCK = 0x90;
 
         #endregion
-
-        /// <summary>
-        /// Creates an instance of UserActivityHook object and sets keyboard hooks.
-        /// </summary>
-        /// <exception cref="Win32Exception">Any windows problem.</exception>
-        public UserActivityHook()
-        {
-            Start();
-        }
-
+        
         /// <summary>
         /// Creates an instance of UserActivityHook object and installs both or one of keyboard hooks and starts rasing events
         /// </summary>
@@ -300,9 +291,9 @@ namespace RingRing
         /// <remarks>
         /// To create an instance without installing hooks call new UserActivityHook(false, false)
         /// </remarks>
-        public UserActivityHook( bool InstallKeyboardHook)
+        public UserActivityHook()
         {
-            Start(InstallKeyboardHook);
+            Start();
         }
 
         /// <summary>
@@ -317,11 +308,11 @@ namespace RingRing
         /// <summary>
         /// Occurs when the user presses a key
         /// </summary>
-        public event KeyEventHandler KeyDown;
+        //public event KeyEventHandler KeyDown;
         /// <summary>
         /// Occurs when the user presses and releases 
         /// </summary>
-        public event KeyPressEventHandler KeyPress;
+        //public event KeyPressEventHandler KeyPress;
         /// <summary>
         /// Occurs when the user releases a key
         /// </summary>
@@ -338,25 +329,20 @@ namespace RingRing
         /// </summary>
         private static HookProc KeyboardHookProcedure;
 
-
         /// <summary>
         /// Installs keyboard hooks and starts rasing events
         /// </summary>
         /// <exception cref="Win32Exception">Any windows problem.</exception>
-        public void Start()
-        {
-            this.Start(true);
-        }
-
+       
         /// <summary>
         /// Installs both or one of keyboard hooks and starts rasing events
         /// </summary>
         /// <param name="InstallKeyboardHook"><b>true</b> if keyboard events must be monitored</param>
         /// <exception cref="Win32Exception">Any windows problem.</exception>
-        public void Start(bool InstallKeyboardHook)
+        public void Start()
         {
             // install Keyboard hook only if it is not installed and must be installed
-            if (hKeyboardHook == 0 && InstallKeyboardHook)
+            if (hKeyboardHook == 0)
             {
                 // Create an instance of HookProc.
                 KeyboardHookProcedure = new HookProc(KeyboardHookProc);
@@ -439,63 +425,121 @@ namespace RingRing
         /// hooks will not receive hook notifications and may behave incorrectly as a result. If the hook 
         /// procedure does not call CallNextHookEx, the return value should be zero. 
         /// </returns>
+        /// 
+
+        int value = 0;
         private int KeyboardHookProc(int nCode, Int32 wParam, IntPtr lParam)
         {
-            //indicates if any of underlaing events set e.Handled flag
             bool handled = false;
-            //it was ok and someone listens to events
-            if ((nCode >= 0) && (KeyDown != null || KeyUp != null || KeyPress != null))
+            int vkCode = Marshal.ReadInt32(lParam);
+            Keys keyData = (Keys)vkCode;
+            KeyEventArgs e = new KeyEventArgs(keyData);
+            bool isDownShift = false;
+            bool isDownCapslock = false;
+            if (nCode >= 0 && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN))
             {
-                //read structure KeyboardHookStruct at lParam
-                KeyboardHookStruct MyKeyboardHookStruct = (KeyboardHookStruct)Marshal.PtrToStructure(lParam, typeof(KeyboardHookStruct));
-                //raise KeyDown
-                if (KeyDown != null && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN))
+                if (keyData == Keys.LShiftKey || keyData == Keys.RShiftKey || keyData == Keys.CapsLock)
                 {
-                    Keys keyData = (Keys)MyKeyboardHookStruct.vkCode;
-                    KeyEventArgs e = new KeyEventArgs(keyData);
-                    KeyDown(this, e);
-                    handled = handled || e.Handled;
+                    value = 0;
                 }
-
-                // raise KeyPress
-                if (KeyPress != null && wParam == WM_KEYDOWN)
+                else
                 {
-                    bool isDownShift = ((GetKeyState(VK_SHIFT) & 0x80) == 0x80 ? true : false);
-                    bool isDownCapslock = (GetKeyState(VK_CAPITAL) != 0 ? true : false);
-
+                    value++;
+                }
+            }
+            // raise KeyPress
+            if (nCode >= 0 && wParam == WM_KEYDOWN)
+            {
+                isDownShift = ((GetKeyState(VK_SHIFT) & 0x80) == 0x80 ? true : false);
+                isDownCapslock = (GetKeyState(VK_CAPITAL) != 0 ? true : false);
+            }
+            // raise KeyUp
+            if (nCode >= 0 && (wParam == WM_KEYUP || wParam == WM_SYSKEYUP))
+            {
+                if (value == 1)
+                {
                     byte[] keyState = new byte[256];
                     GetKeyboardState(keyState);
                     byte[] inBuffer = new byte[2];
-                    if (ToAscii(MyKeyboardHookStruct.vkCode,
-                              MyKeyboardHookStruct.scanCode,
-                              keyState,
-                              inBuffer,
-                              MyKeyboardHookStruct.flags) == 1)
+                    if (ToAscii(vkCode, 0, keyState, inBuffer, 0) == 1)
                     {
                         char key = (char)inBuffer[0];
-                        if ((isDownCapslock ^ isDownShift) && Char.IsLetter(key)) key = Char.ToUpper(key);
-                        KeyPressEventArgs e = new KeyPressEventArgs(key);
-                        KeyPress(this, e);
+                        if ((isDownCapslock ^ isDownShift) && Char.IsLetter(key))
+                        {
+                            key = Char.ToUpper(key);
+                        }
+                        e = new KeyEventArgs((Keys)key);
+                        KeyUp(this, e);
                         handled = handled || e.Handled;
                     }
                 }
-
-                // raise KeyUp
-                if (KeyUp != null && (wParam == WM_KEYUP || wParam == WM_SYSKEYUP))
+                if (keyData != Keys.LShiftKey && keyData != Keys.RShiftKey && keyData != Keys.CapsLock)
                 {
-                    Keys keyData = (Keys)MyKeyboardHookStruct.vkCode;
-                    KeyEventArgs e = new KeyEventArgs(keyData);
-                    KeyUp(this, e);
-                    handled = handled || e.Handled;
+                    value = 0;
                 }
-
             }
-
             //if event handled in application do not handoff to other listeners
             if (handled)
                 return 1;
             else
                 return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
         }
+
+        //private int KeyboardHookProc2(int nCode, Int32 wParam, IntPtr lParam)
+        //{
+        //    //indicates if any of underlaing events set e.Handled flag
+        //    bool handled = false;
+        //    //it was ok and someone listens to events
+        //    if ((nCode >= 0) && (KeyDown != null || KeyUp != null || KeyPress != null))
+        //    {
+        //        //read structure KeyboardHookStruct at lParam
+        //        KeyboardHookStruct MyKeyboardHookStruct = (KeyboardHookStruct)Marshal.PtrToStructure(lParam, typeof(KeyboardHookStruct));
+        //        //raise KeyDown
+        //        if (KeyDown != null && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN))
+        //        {
+        //            Keys keyData = (Keys)MyKeyboardHookStruct.vkCode;
+        //            KeyEventArgs e = new KeyEventArgs(keyData);
+        //            KeyDown(this, e);
+        //            handled = handled || e.Handled;
+        //        }
+        //        // raise KeyPress
+        //        if (KeyPress != null && wParam == WM_KEYDOWN)
+        //        {
+        //            bool isDownShift = ((GetKeyState(VK_SHIFT) & 0x80) == 0x80 ? true : false);
+        //            bool isDownCapslock = (GetKeyState(VK_CAPITAL) != 0 ? true : false);
+
+        //            byte[] keyState = new byte[256];
+        //            GetKeyboardState(keyState);
+        //            byte[] inBuffer = new byte[2];
+        //            if (ToAscii(MyKeyboardHookStruct.vkCode,
+        //                      MyKeyboardHookStruct.scanCode,
+        //                      keyState,
+        //                      inBuffer,
+        //                      MyKeyboardHookStruct.flags) == 1)
+        //            {
+        //                char key = (char)inBuffer[0];
+        //                if ((isDownCapslock ^ isDownShift) && Char.IsLetter(key)) key = Char.ToUpper(key);
+        //                KeyPressEventArgs e = new KeyPressEventArgs(key);
+        //                KeyPress(this, e);
+        //                handled = handled || e.Handled;
+        //            }
+        //        }
+
+        //        // raise KeyUp
+        //        if (KeyUp != null && (wParam == WM_KEYUP || wParam == WM_SYSKEYUP))
+        //        {
+        //            Keys keyData = (Keys)MyKeyboardHookStruct.vkCode;
+        //            KeyEventArgs e = new KeyEventArgs(keyData);
+        //            KeyUp(this, e);
+        //            handled = handled || e.Handled;
+        //        }
+        //    }
+
+        //    //if event handled in application do not handoff to other listeners
+        //    if (handled)
+        //        return 1;
+        //    else
+        //        return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
+        //}
     }
 }

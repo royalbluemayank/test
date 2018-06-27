@@ -9,20 +9,28 @@ using System.Windows.Forms;
 
 namespace RingRing
 {
+    public enum OrderStatus
+    {
+        Close = 0, Open = 1
+    }
     public class Order
     {
         public readonly string OrderNumber = string.Empty;
-        public static bool IsOrderAnonymous = false;
+        public static bool IsClosed = true;
         private string Datetime;
         private static string FileStartText { get { return "{\"JsonData\":["; } }
         private static string FileEndText { get { return "]}"; } }
         private static string FileHeadersAllTxn { get { return "SNo,Product,Name,Amount,DateTime"; } }
+        public static OrderStatus orderStatus { get; private set; }
         public Order(String OrderNumber)
         {
             this.OrderNumber = OrderNumber;
             this.DateTime = System.DateTime.Now.ToString();
             products = new ObservableCollection<Product>();
             Rejectedproducts = new List<Product>();
+            Deletedproducts = new List<Product>();
+            IsClosed = false;
+            Order.orderStatus = OrderStatus.Open;
         }
         public ObservableCollection<Product> products
         {
@@ -32,7 +40,11 @@ namespace RingRing
         {
             get; private set;
         }
-        public void Add(Product product)
+        public List<Product> Deletedproducts
+        {
+            get; private set;
+        }
+        public void AddProduct(Product product)
         {
             if (!products.Contains(product))
             {
@@ -44,7 +56,7 @@ namespace RingRing
             }
             product.Added();
         }
-        public void Remove(Product product)
+        public void RemoveProduct(Product product)
         {
             if (products.Contains(product))
             {
@@ -54,15 +66,31 @@ namespace RingRing
             //products.Remove(products.FirstOrDefault (x => x.Barcode == product.Barcode));
             //products.RemoveAll(x => x.Barcode == product.Barcode);
         }
-        public void Delete(Product product)
+        public void DeleteProduct(Product product)
         {
-            if (products.Contains(product))
+            //if (products.Contains(product))
+            //{
+            //    products.Remove(product);
+            //}
+            //if (Rejectedproducts.Contains(product))
+            //{
+            //    Rejectedproducts.Remove(product);
+            //}
+            //if (!Deletedproducts.Contains(product))
+            //{
+            //    Deletedproducts.Add(product);
+            //}
+        }
+        public void UpdateProducts()
+        {
+            if (Rejectedproducts.Count > 0)
             {
-                products.Remove(product);
-            }
-            if (Rejectedproducts.Contains(product))
-            {
-                Rejectedproducts.Remove(product);
+                Deletedproducts.AddRange(Rejectedproducts);
+                foreach (var item in Rejectedproducts)
+                {
+                    products.Remove(item);
+                }
+                Rejectedproducts.Clear();
             }
         }
         public decimal GettotalAmount
@@ -86,10 +114,6 @@ namespace RingRing
             {
                 this.Datetime = value;
             }
-        }
-        public static void Clean(ref Order o)
-        {
-            o = null;
         }
         public bool SaveData(string filepath)
         {
@@ -180,7 +204,7 @@ namespace RingRing
             try
             {
                 Debug.WriteLine("SendAnonymousList");
-                String Data = File.ReadAllText(Constants.PathforSaveItem); ;
+                String Data = File.ReadAllText(Constants.PathforSaveItem);
                 Debug.WriteLine("Data : " + Data);
                 int count = Data.Count(character => character == '}');
                 Debug.WriteLine("count : " + count);
@@ -200,11 +224,11 @@ namespace RingRing
         }
         public static void Close(ref Order order)
         {
+            Order.orderStatus = OrderStatus.Close;
             order = null;
             //SaveData(".");
             //AllOrders.Add(order);
         }
-
         public class UserInfo
         {
             public UserInfo(string Name, string PhoneNo)
@@ -215,6 +239,7 @@ namespace RingRing
             public string Name { get; }
             public string PhoneNo { get; }
         }
+
         //public void Edit(Product product)
         //{
         //    products.Add(product);

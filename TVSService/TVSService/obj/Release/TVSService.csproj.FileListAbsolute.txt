@@ -1,0 +1,10 @@
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.pdb
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\obj\Release\TVSService.pdb
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\obj\Release\TVSService.csprojResolveAssemblyReference.cache
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\obj\Release\TVSService.ProjectInstaller.resources
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\obj\Release\TVSService.csproj.GenerateResource.Cache
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe.config
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\obj\Release\TVSService.exe
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\Newtonsoft.Json.dll
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\Newtonsoft.Json.xml

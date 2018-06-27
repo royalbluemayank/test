@@ -17,23 +17,16 @@ namespace RingRing
             this.BackgroundColor = BackgroundColor;
             this.Amount = Amount;
             this.Image = "/Resources/" + Image + ".png";
+            this.ProductID = System.DateTime.UtcNow.Ticks.ToString();
             this.DateTime = System.DateTime.Now.ToString();
             this.Applicable = true;
         }
         public ProductStatus productstatus { get; set; }
-        //public String Barcode { get; set; }
-
-        //public string ProductName { get; set; }
-        public string Image { get; set; }
-
-        //public decimal Amount { get; set; }
-        public string BorderColor { get; set; }
-        public bool Applicable { get; set; }
-        public string BackgroundColor { get; set; }
-        public bool Addedinremovedproduct
-        {
-            get; set;
-        }
+        public string Image { get; private set; }
+        public string BorderColor { get; private set; }
+        public bool Applicable { get; private set; }
+        public string BackgroundColor { get; private set; }
+        public bool Addedinremovedproduct{get; private set;}
         public string DateTime
         {
             get
@@ -66,7 +59,7 @@ namespace RingRing
             this.Addedinremovedproduct = true;
             //Console.WriteLine("changeselection stop: {0}", this.ToString());
         }
-        public override string ToString()
+        public string ToSave()
         {
             return this.Barcode + "," + this.ProductName + "," + this.Amount.ToString("0.00") + "," + this.DateTime;
         }

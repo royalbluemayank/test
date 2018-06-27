@@ -17,3 +17,4 @@ D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Release\RingRing.Properties.Resources.
 D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Release\RingRing.csproj.GenerateResource.Cache
 D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Release\RingRing.exe
 D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Release\RingRing.pdb
+D:\mayank\E drive\c#\TVS\WPF\RingRing\obj\Release\RingRing.csprojResolveAssemblyReference.cache

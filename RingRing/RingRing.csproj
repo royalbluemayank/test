@@ -67,12 +67,15 @@
       <HintPath>packages\Newtonsoft.Json.11.0.2\lib\net35\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Sockets">
+      <HintPath>C:\Users\mayank1.gupta\Desktop\SocketWrapper\SocketServer\bin\Debug\Sockets.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -180,7 +183,7 @@
     <Resource Include="Resources\save_Green.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\exportCsv.png" />
+    <Resource Include="Resources\exportCsv.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

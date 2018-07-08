@@ -8,3 +8,5 @@ D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Debug\Newtonsoft.Json
 D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Debug\Newtonsoft.Json.xml
 D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\obj\Debug\TVSService.ProjectInstaller.resources
 D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\obj\Debug\TVSService.csproj.GenerateResource.Cache
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Debug\Sockets.dll
+D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Debug\Sockets.pdb

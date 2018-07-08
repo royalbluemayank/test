@@ -41,6 +41,9 @@
       <HintPath>packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Sockets">
+      <HintPath>C:\Users\mayank1.gupta\Desktop\SocketWrapper\SocketServer\bin\Debug\Sockets.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
@@ -56,9 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="ClientService.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Listener.cs" />
-    <Compile Include="ClientService.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>
     </Compile>

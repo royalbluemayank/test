@@ -468,6 +468,7 @@ namespace RingRing
                         {
                             key = Char.ToUpper(key);
                         }
+                        //Constants.Logger("Ticks: " +DateTime.Now.Ticks + " Hook Key : " + key);
                         e = new KeyEventArgs((Keys)key);
                         KeyUp(this, e);
                         handled = handled || e.Handled;

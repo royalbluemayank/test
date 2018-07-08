@@ -55,7 +55,7 @@ namespace TVSService
                 {
                     ItemsCount = getItemCount();
                 }
-                if (ItemsCount < 5)
+                if (ItemsCount < 100)
                     return true;
                 //ItemsCount = 0;
                 File.Move(PathforSaveItem, PathforSendItem);

@@ -9,6 +9,7 @@ namespace RingRing
     public class Product: OrderHistory.Product
     {
         private string Datetime;
+        private static int ID = 0;
         //private static TimeZoneInfo INDIAN_ZONE = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
         public Product(ProductStatus productstatus = ProductStatus.Pending, string BorderColor = "White", string BackgroundColor = "White", decimal Amount = 0, string Image = "ok_Green")
         {
@@ -17,7 +18,7 @@ namespace RingRing
             this.BackgroundColor = BackgroundColor;
             this.Amount = Amount;
             this.Image = "/Resources/" + Image + ".png";
-            this.ProductID = System.DateTime.UtcNow.Ticks.ToString();
+            this.ProductID = (ID = ID + 1).ToString(); //System.DateTime.UtcNow.Ticks.ToString();
             this.DateTime = System.DateTime.Now.ToString();
             this.Applicable = true;
         }

@@ -17,6 +17,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using Sockets;
+using System.Management;
 //using gma.System.Windows;
 
 namespace RingRing
@@ -26,33 +28,83 @@ namespace RingRing
     /// </summary>
     public partial class MainWindow : Window
     {
+        private Process posApp;
+        private ManagementEventWatcher startWatch;
         //Fetch Main Window
-        //[DllImport("user32.dll")]
-        //static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll",  CharSet = CharSet.Auto)]
+        static extern IntPtr GetForegroundWindow();
 
-        //[DllImport("user32.dll")]
-        //static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+        [DllImport("user32.dll")]
+        static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
 
-        //private string GetActiveWindowTitle()
-        //{
-        //    const int nChars = 256;
-        //    StringBuilder Buff = new StringBuilder(nChars);
-        //    IntPtr handle = GetForegroundWindow();
-        //    if (GetWindowText(handle, Buff, nChars) > 0)
-        //    {
-        //        return Buff.ToString();
-        //    }
-        //    return null;
-        //}
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out uint ProcessId);
+        private string GetActiveWindowTitle()
+        {
+            const int nChars = 256;
+            StringBuilder Buff = new StringBuilder(nChars);
+            IntPtr handle = GetForegroundWindow();
+            if (GetWindowText(handle, Buff, nChars) > 0)
+            {
+                return Buff.ToString();
+            }
+            return null;
+        }
+        private bool IsPOSinFocus()
+        {
+            if (this.posApp != null)
+            {
+                uint ProcessId;
+                GetWindowThreadProcessId(GetForegroundWindow(), out ProcessId);
+                if ((long)this.posApp.Id == (long)ProcessId)
+                    return true;
+            }
+            return false;
+        }
+
+        private bool IsPOSRunning()
+        {
+            if (this.posApp != null)
+                return true;
+            Process[] processesByName = Process.GetProcessesByName(ActivePos);
+            if (processesByName.Length == 0)
+                return false;
+            this.posApp = processesByName[0];
+            this.posApp.EnableRaisingEvents = true;
+            this.posApp.Exited += new EventHandler(this.PosApp_Exited);
+            //mayank this.Invoke((Delegate) (() => this.labelStatus.ForeColor = Color.ForestGreen));
+            return true;
+        }
+
+        private void PosApp_Exited(object sender, EventArgs e)
+        {
+            this.posApp = (Process)null;
+            this.MonitorPOSAppStart();
+        }
+
+        private void MonitorPOSAppStart()
+        {
+            this.startWatch = new ManagementEventWatcher("SELECT *  FROM __InstanceOperationEvent WITHIN  1 WHERE TargetInstance ISA 'Win32_Process' AND TargetInstance.Name = '"+ PosExe+"'");
+            this.startWatch.EventArrived += new EventArrivedEventHandler(this.StartWatch_EventArrived);
+            this.startWatch.Start();
+        }
+        private void StartWatch_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            this.startWatch.EventArrived -= new EventArrivedEventHandler(this.StartWatch_EventArrived);
+            this.startWatch.Stop();
+            this.startWatch = (ManagementEventWatcher)null;
+            this.IsPOSRunning();
+        }
+
 
         ICollectionView view, Txnview;
         public bool clicked, sametext = true;
-        private object _lock = new object();
+        private static object _lock = new object();
         private bool Isbackpressed, loginfailedflag = false;
         Store store;
         String text, previousText = string.Empty, textdash = " - ";
         int caretno;
-        long _lastKeystroke = DateTime.UtcNow.Ticks;
+        long _lastKeystroke = DateTime.Now.Ticks;
         Order order;
         UserActivityHook CaptureHook = null;
         //Hook CaptureHook = null;
@@ -62,12 +114,14 @@ namespace RingRing
         TVSService tvsService = null;
         Thread thread, threadforConnection = null;
         //int counterkeydown, counterkeypress = 0;
-        Socket ClientSocket;
+        //Socket ClientSocket;
         bool IsFirstCharacter = true;
         bool IsconnectedToService= false;
         long TimeoutforKey = 200000;
-        private object _lockforProcessdata = new object();
+        SocketClient pSocketClient;
+        private static object _lockforProcessdata = new object();
         Dictionary<String, Product> tempProducts;
+        String ActivePos, PosExe = null;
         
         public delegate void ClientReceivedHandler(byte[] data);
         public event ClientReceivedHandler Receiveddata;
@@ -79,19 +133,31 @@ namespace RingRing
         public MainWindow()
         {
             InitializeComponent();
-            //this.Topmost = true;
+            this.Topmost = true;
             this.Left = SystemParameters.WorkArea.Width - this.Width - 20;
             this.Top = 5;
+            long temp = Convert.ToInt64(System.Configuration.ConfigurationManager.AppSettings["Timeout"]);
+            if (temp != 0)
+                TimeoutforKey = temp;
+            string tempPos = System.Configuration.ConfigurationManager.AppSettings["Pos"];
+            if (tempPos != null)
+                ActivePos = tempPos;
+            string tempPosExe = System.Configuration.ConfigurationManager.AppSettings["PosExe"];
+            if (tempPosExe != null)
+                PosExe = tempPosExe;
+            
             SettingStore();
         }
         private void SettingStore()
         {
-            store = new Store("0987654321", "Ali Hyper Market");
+
+            store = new Store(System.Configuration.ConfigurationManager.AppSettings["StoreId"], System.Configuration.ConfigurationManager.AppSettings["StoreName"]);
             _lblStoreName.Content = store.StoreName;
             _lblTvsId.Content = store.fullTvsId;
             tempProducts = new Dictionary<string, Product>();
             //textBox.Focus();
-            //System.Windows.Forms.MessageBox.Show(GetActiveWindowTitle());
+            //Console.Write("Active Window :" + GetActiveWindowTitle());
+            this.MonitorPOSAppStart();
             addProductEvent = new AddProductHandler(addProductToOrder);
             m_updatePro = new UpdatePro(updateCart);
             StartCapture();
@@ -107,33 +173,82 @@ namespace RingRing
         {
             try
             {
-                ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                ClientSocket.Connect("127.0.0.1", 8);
+                 pSocketClient = new SocketClient(10240, null,
+                    new Sockets.MessageHandler(MessageHandlerClient),
+                    new Sockets.CloseHandler(CloseHandler),
+                    new Sockets.ErrorHandler(ErrorHandler));
+
+                pSocketClient.Connect("localhost", 8123);
+
+                //for (int i = 0; i < 100; i++)
+                //    pSocketClient.Send("My Message");
+
+                //Console.ReadLine();
+                //pSocketClient.Disconnect();
+                //Console.ReadLine();
+                //pSocketClient.Dispose();
+
+                //ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                //ClientSocket.Connect("127.0.0.1", 8);
                 IsconnectedToService = true;
                 Console.WriteLine("Connected to Server");
-                //byte[] buffer = Encoding.ASCII.GetBytes("hello from client 1");
-                //ClientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
-                ClientSocket.BeginReceive(new byte[] { 0 }, 0, 0, 0, callback, null);
-                this.Receiveddata += ReceivedatafromService;
-                //byte[] buffer2 = Encoding.ASCII.GetBytes("hello from client 2");
-                //ClientSocket.Send(buffer2, 0, buffer2.Length, SocketFlags.None);
+                ////byte[] buffer = Encoding.ASCII.GetBytes("hello from client 1");
+                ////ClientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
+                //ClientSocket.BeginReceive(new byte[] { 0 }, 0, 0, 0, callback, null);
+                //this.Receiveddata += ReceivedatafromService;
+                ////byte[] buffer2 = Encoding.ASCII.GetBytes("hello from client 2");
+                ////ClientSocket.Send(buffer2, 0, buffer2.Length, SocketFlags.None);
             }
             catch(Exception ex)
             {
                 Console.WriteLine("error:  " + ex.Message);
-                ClientSocket = null;
+                //ClientSocket = null;
             }
         }
-        private void ReceivedatafromService(byte[] data)
-        {
+        //private void ReceivedatafromService(byte[] data)
+        //{
 
+        //    try
+        //    {
+        //        Console.WriteLine("data :" + data);
+        //        thread = new Thread(() => ProcessCode(data));
+        //        thread.IsBackground = true;
+        //        thread.Start();
+              
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("==================================Exception ex 1 :" + Environment.NewLine + ex.Message
+        //            + Environment.NewLine + ex.StackTrace + Environment.NewLine + "===================================");
+        //    }
+
+           
+        //    //tempProducts.TryGetValue(product.ProductID, out product);
+        //    //Console.WriteLine("Applicable : true");
+        //    //Console.WriteLine("Data from server : " + value);
+        //    //Console.WriteLine("i Ring Ring : " + i++);
+        //    //Application.Current.Dispatcher.Invoke(new Action(() => { addProduct(value); }));
+        //    //Application.Current.Dispatcher.Invoke(new Action(() => { updateCart(); }));
+        //}
+
+        public void MessageHandlerClient(SocketBase pSocket, Int32 iNumberOfBytes)
+        {
             try
             {
-                Console.WriteLine("data :" + data);
-                thread = new Thread(() => ProcessCode(data));
+                pSocket = ((SocketClient)pSocket);
+                // Find a complete message
+                String strMessage = System.Text.ASCIIEncoding.ASCII.GetString(pSocket.RawBuffer, 0, iNumberOfBytes);
+                //Console.WriteLine("data :" + strMessage);
+                Thread thread = new Thread(() => ProcessCode(strMessage));
                 thread.IsBackground = true;
                 thread.Start();
-              
+
+
+                
+                //thread = new Thread(() => ProcessCode(data));
+                //thread.IsBackground = true;
+                //thread.Start();
+
             }
             catch (Exception ex)
             {
@@ -141,21 +256,44 @@ namespace RingRing
                     + Environment.NewLine + ex.StackTrace + Environment.NewLine + "===================================");
             }
 
-           
-            //tempProducts.TryGetValue(product.ProductID, out product);
-            //Console.WriteLine("Applicable : true");
-            //Console.WriteLine("Data from server : " + value);
-            //Console.WriteLine("i Ring Ring : " + i++);
-            //Application.Current.Dispatcher.Invoke(new Action(() => { addProduct(value); }));
-            //Application.Current.Dispatcher.Invoke(new Action(() => { updateCart(); }));
+            //try
+            //{
+            //    // Convert the message from a byte array to a string
+            //    String strMessage = System.Text.ASCIIEncoding.ASCII.GetString(pSocket.RawBuffer, 0, iNumberOfBytes);
+
+            //    // Display the string to the console window
+            //    Console.WriteLine(strMessage);
+            //}
+            //catch (Exception pException)
+            //{
+            //    Console.WriteLine(pException.Message);
+            //}
+        }
+        //*********************************************
+        /// <summary> Called when a socket connection is closed </summary>
+        /// <param name="pSocket"> The SocketClient object the message came from </param>
+        static public void CloseHandler(SocketBase pSocket)
+        {
+            Console.WriteLine("Server connection closed");
+            //Console.WriteLine("IpAddress: " + pSocket.IpAddress);
+        }
+        //**************************************************
+        /// <summary> Called when a socket error occurs </summary>
+        /// <param name="pSocket"> The SocketClient object the message came from </param>
+        /// <param name="pException"> The reason for the error </param>
+        static public void ErrorHandler(SocketBase pSocket, Exception pException)
+        {
+            Console.WriteLine(pException.Message);
         }
 
-        private void ProcessCode(byte[] data)
+        //private void ProcessCode(byte[] data)
+        private void ProcessCode(string data)
         {
             lock (_lockforProcessdata)
             {
-                String value = Encoding.ASCII.GetString(data);
-                Console.WriteLine("value :" + value);
+                //String value = Encoding.ASCII.GetString(data);
+                String value = data;
+                //Console.WriteLine("data received from server: " + value);
                 TVSService tvsService = JsonConvert.DeserializeObject<TVSService>(value);
 
                 if (tempProducts.ContainsKey(tvsService.Product.ProductID) && tvsService.productType == TVSService.ProductType.ValidUserProduct)
@@ -185,36 +323,36 @@ namespace RingRing
                 updateCart();
             }
         }
-        void callback(IAsyncResult ar)
-        {
-            try
-            {
-                ClientSocket.EndReceive(ar);
-                byte[] buf = new byte[1024];
-                int rec = ClientSocket.Receive(buf, buf.Length, SocketFlags.None);
-                if (rec < buf.Length)
-                {
-                    Array.Resize<byte>(ref buf, rec);
-                }
-                if (Receiveddata != null)
-                {
-                    Receiveddata(buf);
-                }
-                ClientSocket.BeginReceive(new byte[] { 0 }, 0, 0, 0, callback, null);
-            }
-            catch (Exception ex)
-            {
-                System.Windows.Forms.MessageBox.Show(ex.Message);
-            }
-        }
+        //void callback(IAsyncResult ar)
+        //{
+        //    try
+        //    {
+        //        ClientSocket.EndReceive(ar);
+        //        byte[] buf = new byte[1024];
+        //        int rec = ClientSocket.Receive(buf, buf.Length, SocketFlags.None);
+        //        if (rec < buf.Length)
+        //        {
+        //            Array.Resize<byte>(ref buf, rec);
+        //        }
+        //        if (Receiveddata != null)
+        //        {
+        //            Receiveddata(buf);
+        //        }
+        //        ClientSocket.BeginReceive(new byte[] { 0 }, 0, 0, 0, callback, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        System.Windows.Forms.MessageBox.Show(ex.Message);
+        //    }
+        //}
         public void CreateOrder()
         {
             if (order == null)
             {
                 //TransactionStart = false;
-                order = new Order("SampleOrder_" + DateTime.UtcNow.Ticks);
+                order = new Order("SampleOrder_" + DateTime.Now.Ticks);
                 Console.WriteLine(order.OrderNumber);
-                user = new Order.UserInfo("Mayank", "1234567890");
+                user = new Order.UserInfo("Rahul", "1234567890");
                 //cforKeyDown = '\0';
                 bcode.Clear();
                 view = CollectionViewSource.GetDefaultView(order.products);
@@ -246,13 +384,19 @@ namespace RingRing
         }
         public void HookKeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            if (IsFirstCharacter || (DateTime.UtcNow.Ticks - _lastKeystroke) > TimeoutforKey)
+            long TicksNowbasic = DateTime.Now.Ticks;
+            long difference = TicksNowbasic - _lastKeystroke;
+            if (IsFirstCharacter || difference > TimeoutforKey)
             {
                 bcode.Clear();
-                _lastKeystroke = DateTime.UtcNow.Ticks;
+                //Console.WriteLine("---------------------------------------------------------------------------");
+                Constants.Logger(String.Format("--------------------IsFirstCharacter : {0} = cforKeyDown : {1} = int keyupdata : {2} = char keyupdata : {3} = [ TicksNow : {4} - _lastKeystroke : {5} =  taken : {6} ]----------------"
+                  , IsFirstCharacter, (char)e.KeyValue, (int)e.KeyData, (char)e.KeyData, TicksNowbasic, _lastKeystroke, difference));
+                //Console.WriteLine("---------------------------------------------------------------------------");
                 IsFirstCharacter = false;
+                _lastKeystroke = DateTime.Now.Ticks;
             }
-            long TicksNow = DateTime.UtcNow.Ticks;
+            long TicksNow = DateTime.Now.Ticks;
             if (e.KeyValue == 13)
             {
                 String value = new string(bcode.ToArray()).Trim();
@@ -262,7 +406,6 @@ namespace RingRing
                 if (value != String.Empty)
                 {
                     //Validate(value);
-                    //Console.WriteLine(order.GetProductCount + "");
                     thread = new Thread(() => Validate(value));
                     thread.IsBackground = true;
                     thread.Start();
@@ -273,8 +416,8 @@ namespace RingRing
             else
             {
                 long taken = TicksNow - _lastKeystroke;
-                //Console.WriteLine(String.Format("cforKeyDown : {0} = int keyupdata : {1} = char keyupdata : {2} = [ TicksNow : {3} - _lastKeystroke : {4} =  taken : {5} ]"
-                //  , (char)e.KeyValue, (int)e.KeyData, (char)e.KeyData, TicksNow, _lastKeystroke, taken));
+                Constants.Logger(String.Format("cforKeyDown : {0} = int keyupdata : {1} = char keyupdata : {2} = [ TicksNow : {3} - _lastKeystroke : {4} =  taken : {5} ]"
+                  , (char)e.KeyValue, (int)e.KeyData, (char)e.KeyData, TicksNow, _lastKeystroke, taken));
                 if (taken < TimeoutforKey)
                 {
                     bcode.Add((char)e.KeyValue);
@@ -282,30 +425,54 @@ namespace RingRing
                 else
                 {
                     bcode.Clear();
-                    Console.WriteLine("Clear call : " + taken);
+                    Console.WriteLine("Clear called : " + taken);
                     IsFirstCharacter = true;
                 }
             }
-            _lastKeystroke = DateTime.UtcNow.Ticks;
+            _lastKeystroke = DateTime.Now.Ticks;
         }
         private void Validate(string value)
         {
+
+            //Console.WriteLine("validate : " + value);
             lock (_lock)
             {
-                Console.WriteLine("validate : " + value);
+                Console.WriteLine("Data send to server : " + value);
                 Product product = new Product() { Barcode = value };
-                tvsService = new TVSService(Order.IsClosed? TVSService.ProductType.AnonymousProduct : TVSService.ProductType.UserProduct, product);
-                tempProducts.Add(product.ProductID, product);
+                //string Pos = GetActiveWindowTitle();
+                
+                if(!IsPOSRunning() || !IsPOSinFocus())
+                {
+                    Console.WriteLine(" Pos is not Active : " + ActivePos);
+                    tvsService = new TVSService(TVSService.ProductType.AnonymousProduct, product);
+                }
+                else
+                {
+                    tvsService = new TVSService(Order.IsClosed ? TVSService.ProductType.AnonymousProduct : TVSService.ProductType.UserProduct, product);
+                }
+                //Console.WriteLine("product " + product.ProductID + " : " + product);
+                if (tempProducts.ContainsKey(product.ProductID))
+                {
+                    lock (this)
+                    {
+                        product.ProductID = DateTime.Now.Ticks.ToString();
+                        tempProducts.Add(product.ProductID, product);
+                    }
+                }
+                else
+                {
+                    tempProducts.Add(product.ProductID, product);
+                }
                 if (IsconnectedToService)
                 {
                     //Console.WriteLine("data send to service : " + tvsService.ToJsonString());
-                    byte[] buffer = Encoding.ASCII.GetBytes(tvsService.ToJsonString());
+                    //byte[] buffer = Encoding.ASCII.GetBytes(tvsService.ToJsonString());
                     //byte[] buffer = Encoding.ASCII.GetBytes("{\"Islogin\":" + IsUserLogin.ToString().ToLower() + ",\"value\":\"" + value + "\"}");
-                    ClientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
+                    //ClientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
+                    pSocketClient.Send(tvsService.ToJsonString());
+                    //Console.WriteLine("data send to server:" + tvsService.ToJsonString());
                 }
             }
-
-
             //    if (IsUserLogin && order != null)
             //{
             //    //Console.WriteLine("validate : value" + value);
@@ -321,14 +488,14 @@ namespace RingRing
             //    ClientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
             //}
         }
-        private void m_oWorkerdemo_DoWork(object sender, DoWorkEventArgs e)
-        {
-            OrderHistory.Product product = (OrderHistory.Product)e.Argument;
-            if (Order.SaveAnonymousItem(product))
-                e.Result = product;
-            else
-                e.Result = null;
-        }
+        //private void m_oWorkerdemo_DoWork(object sender, DoWorkEventArgs e)
+        //{
+        //    OrderHistory.Product product = (OrderHistory.Product)e.Argument;
+        //    if (Order.SaveAnonymousItem(product))
+        //        e.Result = product;
+        //    else
+        //        e.Result = null;
+        //}
         private void ButtonStopClick(object sender, EventArgs e)
         {
             //CaptureHook.Stop();
@@ -594,10 +761,15 @@ namespace RingRing
         }
         private void _btnRedeem_Click(object sender, RoutedEventArgs e)
         {
+            decimal TotalAmount = 0;
+
+            order.UpdateProducts();
             canvasCoupanDisplay.Visibility = Visibility.Hidden;
             BorderTransactionPanel.Visibility = Visibility.Visible;
             canvasFinishTxn.Visibility = Visibility.Visible;
             canvasEditOrder.Visibility = Visibility.Hidden;
+            BorderFooterPanel.Visibility = Visibility.Hidden;
+            BorderFooterHistoryPanel.Visibility = Visibility.Visible;
 
             //System.Windows.Forms.MessageBox.Show("Order is Closed now.!!");
             OrderHistory oh0 = new OrderHistory(order.OrderNumber, order.GettotalAmount, order.DateTime);
@@ -605,10 +777,15 @@ namespace RingRing
             foreach (var item in order.products)
             {
                 oh0.products.Add(new OrderHistory.Product() { Amount = item.Amount, Barcode = item.Barcode, ProductName = item.ProductName });
-                //    //oh1.products.Add(new OrderHistory.Product() { Amount = item.Amount, Barcode = item.Barcode, ProductName = item.ProductName });
+                                //    //oh1.products.Add(new OrderHistory.Product() { Amount = item.Amount, Barcode = item.Barcode, ProductName = item.ProductName });
             }
 
             Store.Orders.Add(oh0);
+            foreach (var item in Store.Orders)
+            {
+                TotalAmount += item.OrderAmount;
+            }
+            _lblTotalDiscountAmountHistory.Content = Store.Currency + TotalAmount;
             Order.IsClosed = true;
             //CloseOrder();
 
@@ -664,21 +841,24 @@ namespace RingRing
             lvItems.Visibility = Visibility.Visible;
             _lblHeader.Content = Constants.HeaderProductdescription;
             lvTxnHistory.Visibility = Visibility.Hidden;
+            BorderFooterPanel.Visibility = Visibility.Visible;
+            BorderFooterHistoryPanel.Visibility = Visibility.Hidden;
         }
         private void Back_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (System.Windows.Forms.MessageBox.Show("Do you want to Close the Current Txn ?", "Confirmation", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
             {
-                if (order.GetProductCount == 0)
-                {
-                    CloseOrder();
-                    Order.IsClosed = true;
-                    ResetScreen();
-                }
-                else
-                {
-                    System.Windows.Forms.MessageBox.Show("Product Count : " + order.GetProductCount);
-                }
+                //if (order.GetProductCount == 0)
+                //{
+                BackImage_MouseDown(null, null);
+                CloseOrder();
+                Order.IsClosed = true;
+                ResetScreen();
+                //}
+                //else
+                //{
+                //    System.Windows.Forms.MessageBox.Show("Product Count : " + order.GetProductCount);
+                //}
             }
         }
         private void Forward_MouseDown(object sender, MouseButtonEventArgs e)
@@ -769,7 +949,7 @@ namespace RingRing
             //    TransactionStart = true;
             //}
             _lblTotalDiscountAmount.Content = Store.Currency + order.GettotalAmount;
-            _lbl_coupan.Content = order.products.Count - order.Rejectedproducts.Count;// + " coupan(s)";
+            _lbl_coupan.Content = order.products.Count;// + " coupan(s)";
         }
 
         //private void startWorkerProcess(String productBarcode)

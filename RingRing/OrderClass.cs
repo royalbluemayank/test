@@ -66,21 +66,22 @@ namespace RingRing
             //products.Remove(products.FirstOrDefault (x => x.Barcode == product.Barcode));
             //products.RemoveAll(x => x.Barcode == product.Barcode);
         }
-        public void DeleteProduct(Product product)
-        {
-            //if (products.Contains(product))
-            //{
-            //    products.Remove(product);
-            //}
-            //if (Rejectedproducts.Contains(product))
-            //{
-            //    Rejectedproducts.Remove(product);
-            //}
-            //if (!Deletedproducts.Contains(product))
-            //{
-            //    Deletedproducts.Add(product);
-            //}
-        }
+
+        //public void DeleteProduct(Product product)
+        //{
+        //    //if (products.Contains(product))
+        //    //{
+        //    //    products.Remove(product);
+        //    //}
+        //    //if (Rejectedproducts.Contains(product))
+        //    //{
+        //    //    Rejectedproducts.Remove(product);
+        //    //}
+        //    //if (!Deletedproducts.Contains(product))
+        //    //{
+        //    //    Deletedproducts.Add(product);
+        //    //}
+        //}
         public void UpdateProducts()
         {
             if (Rejectedproducts.Count > 0)
@@ -95,12 +96,13 @@ namespace RingRing
         }
         public decimal GettotalAmount
         {
-            get { return products.Where(e => !e.Addedinremovedproduct && e.Applicable).Select(x => x.Amount).Sum(); }
+            get { return products.Select(x => x.Amount).Sum(); }
+            //get { return products.Where(e => !e.Addedinremovedproduct && e.Applicable).Select(x => x.Amount).Sum(); }
         }
-        public int GetProductCount
-        {
-            get { return products.Count - Rejectedproducts.Count; }
-        }
+        //public int GetProductCount
+        //{
+        //    get { return products.Count - Rejectedproducts.Count; }
+        //}
         public string DateTime
         {
             get
@@ -185,20 +187,7 @@ namespace RingRing
                 return false;
             }
         }
-        public static void Logger(String logs)
-        {
-            try
-            {
-                using (StreamWriter sw = new StreamWriter(File.Open(Constants.Pathforlogger, FileMode.Append)))
-                {
-                    sw.WriteLine(String.Format("[ {0} ] ------ {1}", System.DateTime.Now.ToString("yyyy MMMM dd hh:mm:ss tt"),logs));
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.StackTrace);
-            }
-        }
+        
         public static bool SendAnonymousList()
         {
             try

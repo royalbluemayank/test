@@ -19,6 +19,10 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Sockets;
 using System.Management;
+using RawInput_dll;
+using System.Windows.Interop;
+using System.Timers;
+using System.Collections;
 //using gma.System.Windows;
 
 namespace RingRing
@@ -30,6 +34,7 @@ namespace RingRing
     {
         private Process posApp;
         private ManagementEventWatcher startWatch;
+        private System.Timers.Timer keyboardTimer = new System.Timers.Timer(20.0);
         //Fetch Main Window
         [DllImport("user32.dll",  CharSet = CharSet.Auto)]
         static extern IntPtr GetForegroundWindow();
@@ -106,7 +111,9 @@ namespace RingRing
         int caretno;
         long _lastKeystroke = DateTime.Now.Ticks;
         Order order;
-        UserActivityHook CaptureHook = null;
+        private RawInput _rawinput;
+        private ArrayList scanCode = new ArrayList();
+        //UserActivityHook CaptureHook = null;
         //Hook CaptureHook = null;
         List<char> bcode = new List<char>(10);
         ///Product product = null;
@@ -117,6 +124,8 @@ namespace RingRing
         //Socket ClientSocket;
         bool IsFirstCharacter = true;
         bool IsconnectedToService= false;
+        private string vid = "";
+        private string testCode = "";
         long TimeoutforKey = 200000;
         SocketClient pSocketClient;
         private static object _lockforProcessdata = new object();
@@ -145,8 +154,14 @@ namespace RingRing
             string tempPosExe = System.Configuration.ConfigurationManager.AppSettings["PosExe"];
             if (tempPosExe != null)
                 PosExe = tempPosExe;
-            
             SettingStore();
+        }
+
+        private void KeyboardTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            this.keyboardTimer.Stop();
+            this.scanCode.Clear();
+            this.testCode = "";
         }
         private void SettingStore()
         {
@@ -315,6 +330,121 @@ namespace RingRing
                 }
             }
         }
+
+        private void evalCode()
+        {
+            if (this.scanCode.Count > 5)
+            {
+                String m = this.parseScanCode(this.scanCode);
+                Console.WriteLine(m);
+                thread = new Thread(() => Validate(m));
+                thread.IsBackground = true;
+                thread.Start();
+            }
+            this.scanCode.Clear();
+            this.testCode = "";
+        }
+
+        private string parseScanCode(ArrayList scancode)
+        {
+            string str1 = "";
+            bool flag = false;
+            for (int index = 0; index < scancode.Count; ++index)
+            {
+                if ((int)(uint)scancode[index] == 162 || (int)(uint)scancode[index] == 163 || (int)(uint)scancode[index] == 17)
+                {
+                    ++index;
+                }
+                else
+                {
+                    if ((int)(uint)scancode[index] == 13)
+                        return str1;
+                    char ch1;
+                    if ((int)(uint)scancode[index] == 161 || (int)(uint)scancode[index] == 160 || (int)(uint)scancode[index] == 16)
+                        flag = true;
+                    else if ((uint)scancode[index] >= 32U && (uint)scancode[index] <= 64U)
+                    {
+                        byte num = (byte)(uint)scancode[index];
+                        string str2 = str1;
+                        ch1 = (char)num;
+                        string str3 = ch1.ToString();
+                        str1 = str2 + str3;
+                    }
+                    else if ((uint)scancode[index] >= 65U && (uint)scancode[index] <= 90U)
+                    {
+                        byte num = (byte)(uint)scancode[index];
+                        if (!flag)
+                        {
+                            string str2 = str1;
+                            ch1 = (char)((uint)num + 32U);
+                            string str3 = ch1.ToString();
+                            str1 = str2 + str3;
+                        }
+                        else
+                        {
+                            string str2 = str1;
+                            ch1 = (char)num;
+                            string str3 = ch1.ToString();
+                            str1 = str2 + str3;
+                        }
+                    }
+                    else if ((uint)scancode[index] >= 97U && (uint)scancode[index] <= 122U)
+                    {
+                        byte num = (byte)(uint)scancode[index];
+                        string str2 = str1;
+                        ch1 = (char)num;
+                        string str3 = ch1.ToString();
+                        str1 = str2 + str3;
+                    }
+                    else
+                    {
+                        str1 += (char)((uint)scancode[index]);
+                        //char ch2;
+                        //if ((int)(ch2 = this.getChar((uint)scancode[index])) != 0)
+                        //    str1 += ch2.ToString();
+                        //else
+                        //    break;
+                    }
+                }
+            }
+            this.scanCode.Clear();
+            return "";
+        }
+
+        private char getChar(uint code)
+        {
+            switch (code)
+            {
+                case 186:
+                    return ';';
+                case 187:
+                    return '+';
+                case 188:
+                    return ',';
+                case 189:
+                    return '-';
+                case 190:
+                    return '.';
+                case 191:
+                    return '?';
+                case 192:
+                    return '`';
+                case 219:
+                    return '{';
+                case 220:
+                    return '|';
+                case 221:
+                    return '}';
+                case 222:
+                    return '\'';
+                case 226:
+                    return '\\';
+                case 254:
+                    return ' ';
+                default:
+                    return char.MinValue;
+            }
+        }
         void addProductToOrder(Product product)
         {
             if (product.Applicable)
@@ -367,8 +497,12 @@ namespace RingRing
         {
             try
             {
-                CaptureHook = new UserActivityHook();
-                CaptureHook.KeyUp += HookKeyUp;
+                _rawinput = new RawInput(new WindowInteropHelper(this).EnsureHandle(), false);
+                this._rawinput.AddMessageFilter();
+                this._rawinput.KeyPressed += new RawKeyboard.DeviceEventHandler(this.OnKeyPressed);
+                this.keyboardTimer.Elapsed += new ElapsedEventHandler(this.KeyboardTimer_Elapsed);
+                //CaptureHook = new UserActivityHook();
+                //CaptureHook.KeyUp += HookKeyUp;
                 #region extra comments
                 //CaptureHook.KeyPress += new System.Windows.Forms.KeyPressEventHandler(MyKeyPress);
                 //CaptureHook.KeyDown += new System.Windows.Forms.KeyEventHandler(MyKeydown);
@@ -382,55 +516,90 @@ namespace RingRing
                 System.Windows.Forms.MessageBox.Show(ex.Message);
             }
         }
-        public void HookKeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+
+        private void OnKeyPressed(object sender, RawInputEventArg e)
         {
-            long TicksNowbasic = DateTime.Now.Ticks;
-            long difference = TicksNowbasic - _lastKeystroke;
-            if (IsFirstCharacter || difference > TimeoutforKey)
+            this.keyboardTimer.Stop();
+            this.keyboardTimer.Start();
+            string[] strArray = e.KeyPressEvent.DeviceName.Split('#');
+            if (strArray.Length < 2)
+                return;
+            if (this.scanCode.Count == 0)
             {
-                bcode.Clear();
-                //Console.WriteLine("---------------------------------------------------------------------------");
-                Constants.Logger(String.Format("--------------------IsFirstCharacter : {0} = cforKeyDown : {1} = int keyupdata : {2} = char keyupdata : {3} = [ TicksNow : {4} - _lastKeystroke : {5} =  taken : {6} ]----------------"
-                  , IsFirstCharacter, (char)e.KeyValue, (int)e.KeyData, (char)e.KeyData, TicksNowbasic, _lastKeystroke, difference));
-                //Console.WriteLine("---------------------------------------------------------------------------");
-                IsFirstCharacter = false;
-                _lastKeystroke = DateTime.Now.Ticks;
+                this.keyboardTimer.Stop();
+                this.keyboardTimer.Start();
+                this.vid = strArray[1];
             }
-            long TicksNow = DateTime.Now.Ticks;
-            if (e.KeyValue == 13)
+            else if (this.vid != strArray[1])
             {
-                String value = new string(bcode.ToArray()).Trim();
-                //value = value.Replace("\0", "");
-                bcode.Clear();
-                //Console.WriteLine("value : " + value);
-                if (value != String.Empty)
-                {
-                    //Validate(value);
-                    thread = new Thread(() => Validate(value));
-                    thread.IsBackground = true;
-                    thread.Start();
-                    //Console.WriteLine("thread start");
-                }
-                IsFirstCharacter = true;
+                this.scanCode.Clear();
+                this.keyboardTimer.Stop();
+                this.keyboardTimer.Start();
+                this.vid = strArray[1];
             }
-            else
-            {
-                long taken = TicksNow - _lastKeystroke;
-                Constants.Logger(String.Format("cforKeyDown : {0} = int keyupdata : {1} = char keyupdata : {2} = [ TicksNow : {3} - _lastKeystroke : {4} =  taken : {5} ]"
-                  , (char)e.KeyValue, (int)e.KeyData, (char)e.KeyData, TicksNow, _lastKeystroke, taken));
-                if (taken < TimeoutforKey)
-                {
-                    bcode.Add((char)e.KeyValue);
-                }
-                else
-                {
-                    bcode.Clear();
-                    Console.WriteLine("Clear called : " + taken);
-                    IsFirstCharacter = true;
-                }
-            }
-            _lastKeystroke = DateTime.Now.Ticks;
+            if ((int)e.KeyPressEvent.Message == 257)
+                return;
+            object j = (object)(uint)e.KeyPressEvent.VKey;
+            //Console.WriteLine(j);
+            this.scanCode.Add(j);
+            this.testCode = this.testCode + e.KeyPressEvent.VKeyName + " ";
+            if (e.KeyPressEvent.VKey != 13)
+                return;
+            this.keyboardTimer.Stop();
+            this.evalCode();
         }
+
+
+        //public void HookKeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        //{
+        //    long TicksNowbasic = DateTime.Now.Ticks;
+        //    long difference = TicksNowbasic - _lastKeystroke;
+        //    if (IsFirstCharacter || difference > TimeoutforKey)
+        //    {
+        //        bcode.Clear();
+        //        //Console.WriteLine("---------------------------------------------------------------------------");
+        //        Constants.Logger(String.Format("--------------------IsFirstCharacter : {0} = cforKeyDown : {1} = int keyupdata : {2} = char keyupdata : {3} = [ TicksNow : {4} - _lastKeystroke : {5} =  taken : {6} ]----------------"
+        //          , IsFirstCharacter, (char)e.KeyValue, (int)e.KeyData, (char)e.KeyData, TicksNowbasic, _lastKeystroke, difference));
+        //        //Console.WriteLine("---------------------------------------------------------------------------");
+        //        IsFirstCharacter = false;
+        //        _lastKeystroke = DateTime.Now.Ticks;
+        //    }
+        //    long TicksNow = DateTime.Now.Ticks;
+        //    if (e.KeyValue == 13)
+        //    {
+        //        String value = new string(bcode.ToArray()).Trim();
+        //        //value = value.Replace("\0", "");
+        //        bcode.Clear();
+        //        //Console.WriteLine("value : " + value);
+        //        if (value != String.Empty)
+        //        {
+        //            //Validate(value);
+        //            thread = new Thread(() => Validate(value));
+        //            thread.IsBackground = true;
+        //            thread.Start();
+        //            //Console.WriteLine("thread start");
+        //        }
+        //        IsFirstCharacter = true;
+        //    }
+        //    else
+        //    {
+        //        long taken = TicksNow - _lastKeystroke;
+        //        Constants.Logger(String.Format("cforKeyDown : {0} = int keyupdata : {1} = char keyupdata : {2} = [ TicksNow : {3} - _lastKeystroke : {4} =  taken : {5} ]"
+        //          , (char)e.KeyValue, (int)e.KeyData, (char)e.KeyData, TicksNow, _lastKeystroke, taken));
+        //        if (taken < TimeoutforKey)
+        //        {
+        //            bcode.Add((char)e.KeyValue);
+        //        }
+        //        else
+        //        {
+        //            bcode.Clear();
+        //            Console.WriteLine("Clear called : " + taken);
+        //            IsFirstCharacter = true;
+        //        }
+        //    }
+        //    _lastKeystroke = DateTime.Now.Ticks;
+        //}
+
         private void Validate(string value)
         {
 

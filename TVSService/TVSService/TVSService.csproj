@@ -68,6 +68,7 @@
     <Compile Include="ProjectInstaller.Designer.cs">
       <DependentUpon>ProjectInstaller.cs</DependentUpon>
     </Compile>
+    <Compile Include="Transaction.cs" />
     <Compile Include="TVSService.cs">
       <SubType>Component</SubType>
     </Compile>

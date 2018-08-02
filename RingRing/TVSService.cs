@@ -12,6 +12,10 @@ namespace RingRing
         {
             this.productType = productType;
             this.Product = product;
+            this.txOid = Transaction.createtxnresponse.oid;
+            this.ownerUserOid = Transaction.createtxnresponse.ownerUserOid;
+            this.storeUserOid = Transaction.createtxnresponse.storeUserOid;
+            this.token = Constants.token;
         }
         public enum ProductType
         {
@@ -19,7 +23,10 @@ namespace RingRing
         }
         public OrderHistory.Product Product { get; private set; }
         public ProductType productType { get; private set; }
-        //public bool IsClosed { get; private set; }
+        public int txOid { get; private set; }
+        public int ownerUserOid { get; private set; }
+        public int storeUserOid { get; private set; }
+        public string token { get; private set; }
         public string ToJsonString()
         {
             return JsonConvert.SerializeObject(this);

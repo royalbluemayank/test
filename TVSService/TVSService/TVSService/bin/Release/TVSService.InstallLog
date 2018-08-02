@@ -1,0 +1,307 @@
+﻿Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Rolling back assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Restoring event log to previous state for source TVSServiceInstaller Test.
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Warning: The source TVSServiceInstaller Test is not registered on the local machine.
+Service TVSServiceInstaller Test is being removed from the system...
+An exception occurred during the uninstallation of the System.ServiceProcess.ServiceInstaller installer.
+System.ComponentModel.Win32Exception: The specified service does not exist as an installed service
+An exception occurred while uninstalling. This exception will be ignored and the uninstall will continue. However, the application might not be fully uninstalled after the uninstall is complete.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Attempt to stop service TVSServiceInstaller Test.
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Warning: The source TVSServiceInstaller Test is not registered on the local machine.
+Service TVSServiceInstaller Test is being removed from the system...
+An exception occurred during the uninstallation of the System.ServiceProcess.ServiceInstaller installer.
+System.ComponentModel.Win32Exception: The specified service does not exist as an installed service
+An exception occurred while uninstalling. This exception will be ignored and the uninstall will continue. However, the application might not be fully uninstalled after the uninstall is complete.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Warning: The source TVSServiceInstaller Test is not registered on the local machine.
+Service TVSServiceInstaller Test is being removed from the system...
+An exception occurred during the uninstallation of the System.ServiceProcess.ServiceInstaller installer.
+System.ComponentModel.Win32Exception: The specified service does not exist as an installed service
+An exception occurred while uninstalling. This exception will be ignored and the uninstall will continue. However, the application might not be fully uninstalled after the uninstall is complete.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.
+Installing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Installing service TVSServiceInstaller Test...
+Service TVSServiceInstaller Test has been successfully installed.
+Creating EventLog source TVSServiceInstaller Test in log Application...
+Committing assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Uninstalling assembly 'D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.InstallLog
+   assemblypath = D:\mayank\E drive\c#\TVS\Service\TVSService\TVSService\bin\Release\TVSService.exe
+Removing EventLog source TVSServiceInstaller Test.
+Service TVSServiceInstaller Test is being removed from the system...
+Service TVSServiceInstaller Test was successfully removed from the system.

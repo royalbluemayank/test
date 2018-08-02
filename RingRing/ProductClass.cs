@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace RingRing
 {
@@ -23,11 +24,18 @@ namespace RingRing
             this.Applicable = true;
         }
         public ProductStatus productstatus { get; set; }
+
+        [JsonIgnore]
         public string Image { get; private set; }
+        [JsonIgnore]
         public string BorderColor { get; private set; }
+        [JsonIgnore]
         public bool Applicable { get; private set; }
+        [JsonIgnore]
         public string BackgroundColor { get; private set; }
+        [JsonIgnore]
         public bool Addedinremovedproduct{get; private set;}
+        [JsonIgnore]
         public string DateTime
         {
             get

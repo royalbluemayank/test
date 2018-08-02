@@ -25,6 +25,9 @@ namespace TVSService
         public static string Pathforlogger { get { return Folderpath + "logs.txt"; } }
         private static string FileStartText { get { return "{\"Items\":["; } }
         private static string FileEndText { get { return "]}"; } }
+        public static string UrlforMakeTransaction { get { return "https://api.dev.xaos.aintu.io/rest/txItem"; } }
+        public static string UrlforGetTransaction { get { return "https://api.dev.xaos.aintu.io/rest/txClip"; } }
+
         #endregion
 
         #region Methods

@@ -59,7 +59,7 @@ namespace RingRing
     {
         //private string Datetime;
         public string OrderNumber { get; }
-        public decimal OrderAmount { get; }
+        public decimal OrderAmount { set; get; }
         public string DateTime
         {
             get; private set;

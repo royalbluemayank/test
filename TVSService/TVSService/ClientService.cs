@@ -6,7 +6,10 @@ namespace TVSService
     {
         public Product Product { get; set; }
         public ProductType productType { get; set; }
-        //public bool IsClosed { get; set; }
+        public int txOid { get;  set; }
+        public int ownerUserOid { get;  set; }
+        public int storeUserOid { get;  set; }
+        public string token { get;  set; }
         public string ToJsonString()
         {
             return JsonConvert.SerializeObject(this);

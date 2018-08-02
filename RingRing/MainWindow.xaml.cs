@@ -23,6 +23,7 @@ using RawInput_dll;
 using System.Windows.Interop;
 using System.Timers;
 using System.Collections;
+using System.Security.Permissions;
 //using gma.System.Windows;
 
 namespace RingRing
@@ -35,6 +36,7 @@ namespace RingRing
         private Process posApp;
         private ManagementEventWatcher startWatch;
         private System.Timers.Timer keyboardTimer = new System.Timers.Timer(20.0);
+        static private System.Timers.Timer TVSServiceTimer = new System.Timers.Timer(2000);
         //Fetch Main Window
         [DllImport("user32.dll",  CharSet = CharSet.Auto)]
         static extern IntPtr GetForegroundWindow();
@@ -139,7 +141,7 @@ namespace RingRing
         private event AddProductHandler addProductEvent;
         public delegate void UpdatePro();
         private event UpdatePro m_updatePro;
-        public MainWindow()
+        public MainWindow() 
         {
             InitializeComponent();
             this.Topmost = true;
@@ -165,22 +167,43 @@ namespace RingRing
         }
         private void SettingStore()
         {
+            if (Transaction.Introspect())
+            {
+                if (Transaction.RetrieveStore())
+                {
+                    store = new Store(Transaction.retrievestoreresponse.oid.ToString(), Transaction.retrievestoreresponse.displayName);
+                    //store = new Store(System.Configuration.ConfigurationManager.AppSettings["StoreId"], System.Configuration.ConfigurationManager.AppSettings["StoreName"]);
+                    _lblStoreName.Content = store.StoreName;
+                    _lblTvsId.Content = store.fullTvsId;
 
-            store = new Store(System.Configuration.ConfigurationManager.AppSettings["StoreId"], System.Configuration.ConfigurationManager.AppSettings["StoreName"]);
-            _lblStoreName.Content = store.StoreName;
-            _lblTvsId.Content = store.fullTvsId;
-            tempProducts = new Dictionary<string, Product>();
-            //textBox.Focus();
-            //Console.Write("Active Window :" + GetActiveWindowTitle());
-            this.MonitorPOSAppStart();
-            addProductEvent = new AddProductHandler(addProductToOrder);
-            m_updatePro = new UpdatePro(updateCart);
-            StartCapture();
-            //CreateRequest();
-            threadforConnection = new Thread(CreateRequestwithService);
-            threadforConnection.IsBackground = true;
-            threadforConnection.Start();
-            
+                    if (!Transaction.SetStore("1285091"))
+                    {
+                        System.Windows.Forms.MessageBox.Show("CLosing Application", "SetStore");
+                        this.Close();
+                    }
+                    tempProducts = new Dictionary<string, Product>();
+                    //textBox.Focus();
+                    //Console.Write("Active Window :" + GetActiveWindowTitle());
+                    this.MonitorPOSAppStart();
+                    addProductEvent = new AddProductHandler(addProductToOrder);
+                    m_updatePro = new UpdatePro(updateCart);
+                    StartCapture();
+                    //CreateRequest();
+                    threadforConnection = new Thread(ConnectToTvsInLoop);
+                    threadforConnection.IsBackground = true;
+                    threadforConnection.Start();
+                }
+                else
+                {
+                    System.Windows.Forms.MessageBox.Show("CLosing Application", "RetrieveStore");
+                    this.Close();
+                }
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("CLosing Application", "Introspect");
+                this.Close();
+            }
             //String m = AppDomain.CurrentDomain.FriendlyName;
             //Console.WriteLine(m);
         }
@@ -216,7 +239,7 @@ namespace RingRing
             }
             catch(Exception ex)
             {
-                Console.WriteLine("error:  " + ex.Message);
+                //Console.WriteLine("error:  " + ex.Message);
                 //ClientSocket = null;
             }
         }
@@ -287,11 +310,38 @@ namespace RingRing
         //*********************************************
         /// <summary> Called when a socket connection is closed </summary>
         /// <param name="pSocket"> The SocketClient object the message came from </param>
-        static public void CloseHandler(SocketBase pSocket)
+        public void CloseHandler(SocketBase pSocket)
         {
-            Console.WriteLine("Server connection closed");
+            IsconnectedToService = false;
+            threadforConnection = new Thread(ConnectToTvsInLoop);
+            threadforConnection.IsBackground = true;
+            threadforConnection.Start();
+
+            //Console.WriteLine("Server connection closed");
+            //TVSServiceTimer.Elapsed += TVSServiceTimer_Elapsed;
+            //TVSServiceTimer.Start();
             //Console.WriteLine("IpAddress: " + pSocket.IpAddress);
         }
+
+        public void ConnectToTvsInLoop()
+        {
+            Console.WriteLine("Disconnected to Server");
+            do
+            {
+                CreateRequestwithService();
+            } while (!IsconnectedToService);
+        }
+
+        private void TVSServiceTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            CreateRequestwithService();
+            if (IsconnectedToService)
+            {
+                TVSServiceTimer.Stop();
+                TVSServiceTimer.Elapsed -= TVSServiceTimer_Elapsed;
+            }
+        }
+
         //**************************************************
         /// <summary> Called when a socket error occurs </summary>
         /// <param name="pSocket"> The SocketClient object the message came from </param>
@@ -308,7 +358,9 @@ namespace RingRing
             {
                 //String value = Encoding.ASCII.GetString(data);
                 String value = data;
-                //Console.WriteLine("data received from server: " + value);
+                Console.WriteLine("data received from server: " + value);
+                Constants.Logger("data received from server: " + value);
+
                 TVSService tvsService = JsonConvert.DeserializeObject<TVSService>(value);
 
                 if (tempProducts.ContainsKey(tvsService.Product.ProductID) && tvsService.productType == TVSService.ProductType.ValidUserProduct)
@@ -337,7 +389,7 @@ namespace RingRing
             {
                 String m = this.parseScanCode(this.scanCode);
                 Console.WriteLine(m);
-                thread = new Thread(() => Validate(m));
+                thread = new Thread(() => SendtoTVSService(m));
                 thread.IsBackground = true;
                 thread.Start();
             }
@@ -480,9 +532,10 @@ namespace RingRing
             if (order == null)
             {
                 //TransactionStart = false;
-                order = new Order("SampleOrder_" + DateTime.Now.Ticks);
-                Console.WriteLine(order.OrderNumber);
-                user = new Order.UserInfo("Rahul", "1234567890");
+                order = new Order(Transaction.createtxnresponse.oid.ToString());
+                Console.WriteLine("Creating a new Order, No is " + order.OrderNumber);
+                user = new Order.UserInfo(Transaction.createtxnresponse.consumerName, Transaction.createtxnresponse.consumerPin);
+                _lbl_UserName.Content = user.Name.Substring(0, user.Name.IndexOf(' '));
                 //cforKeyDown = '\0';
                 bcode.Clear();
                 view = CollectionViewSource.GetDefaultView(order.products);
@@ -600,19 +653,21 @@ namespace RingRing
         //    _lastKeystroke = DateTime.Now.Ticks;
         //}
 
-        private void Validate(string value)
+        private void SendtoTVSService(string value)
         {
 
             //Console.WriteLine("validate : " + value);
             lock (_lock)
             {
                 Console.WriteLine("Data send to server : " + value);
+                Constants.Logger("Data send to server : " + value);
+
                 Product product = new Product() { Barcode = value };
                 //string Pos = GetActiveWindowTitle();
                 
                 if(!IsPOSRunning() || !IsPOSinFocus())
                 {
-                    Console.WriteLine(" Pos is not Active : " + ActivePos);
+                    Console.WriteLine("Configured Pos is not Active : " + ActivePos);
                     tvsService = new TVSService(TVSService.ProductType.AnonymousProduct, product);
                 }
                 else
@@ -634,7 +689,7 @@ namespace RingRing
                 }
                 if (IsconnectedToService)
                 {
-                    //Console.WriteLine("data send to service : " + tvsService.ToJsonString());
+                    Console.WriteLine("data send to service : " + tvsService.ToJsonString());
                     //byte[] buffer = Encoding.ASCII.GetBytes(tvsService.ToJsonString());
                     //byte[] buffer = Encoding.ASCII.GetBytes("{\"Islogin\":" + IsUserLogin.ToString().ToLower() + ",\"value\":\"" + value + "\"}");
                     //ClientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
@@ -803,7 +858,7 @@ namespace RingRing
         private bool SendforValidUser(string text)
         {
             text = text.Replace("-", "").Replace(" ", "").Replace(Environment.NewLine, "");
-            if (text.Equals("111111111111"))
+            if(Transaction.CreateTxn(text))
             {
                 LoginSuccess();
                 return true;
@@ -930,73 +985,92 @@ namespace RingRing
         }
         private void _btnRedeem_Click(object sender, RoutedEventArgs e)
         {
-            decimal TotalAmount = 0;
-
-            order.UpdateProducts();
-            canvasCoupanDisplay.Visibility = Visibility.Hidden;
-            BorderTransactionPanel.Visibility = Visibility.Visible;
-            canvasFinishTxn.Visibility = Visibility.Visible;
-            canvasEditOrder.Visibility = Visibility.Hidden;
-            BorderFooterPanel.Visibility = Visibility.Hidden;
-            BorderFooterHistoryPanel.Visibility = Visibility.Visible;
-
-            //System.Windows.Forms.MessageBox.Show("Order is Closed now.!!");
-            OrderHistory oh0 = new OrderHistory(order.OrderNumber, order.GettotalAmount, order.DateTime);
-            //OrderHistory oh1 = new OrderHistory("or1", order.GettotalAmount + 1, DateTime.Now.AddDays(27).AddHours(2).ToString());
-            foreach (var item in order.products)
+            Console.WriteLine("Txn Redeemed No is" + order.OrderNumber);
+            if (Transaction.RedeemTxn())
             {
-                oh0.products.Add(new OrderHistory.Product() { Amount = item.Amount, Barcode = item.Barcode, ProductName = item.ProductName });
-                                //    //oh1.products.Add(new OrderHistory.Product() { Amount = item.Amount, Barcode = item.Barcode, ProductName = item.ProductName });
-            }
+                if (Transaction.redeemtxnresponse != null && Transaction.redeemtxnresponse.status.ToLower() == "committed")
+                {
+                    if (Transaction.GetRedeemTxn())
+                    {
+                        decimal TotalAmount = 0;
+                        if (order != null)
+                        {
+                            order.UpdateProducts();
+                        }
+                        canvasCoupanDisplay.Visibility = Visibility.Hidden;
+                        BorderTransactionPanel.Visibility = Visibility.Visible;
+                        canvasFinishTxn.Visibility = Visibility.Visible;
+                        canvasEditOrder.Visibility = Visibility.Hidden;
+                        BorderFooterPanel.Visibility = Visibility.Hidden;
+                        BorderFooterHistoryPanel.Visibility = Visibility.Visible;
 
-            Store.Orders.Add(oh0);
-            foreach (var item in Store.Orders)
-            {
-                TotalAmount += item.OrderAmount;
-            }
-            _lblTotalDiscountAmountHistory.Content = Store.Currency + TotalAmount;
-            Order.IsClosed = true;
-            //CloseOrder();
+                        OrderHistory oh0 = new OrderHistory(Transaction.transactionresponselist[0].oid.ToString(), TotalAmount,Constants.ConvertToDateTimefromISO8601(Transaction.redeemtxnresponse.finished));
 
-            #region extras
-            //Store.Orders.Add(oh1);
+                        //OrderHistory oh1 = new OrderHistory("or1", order.GettotalAmount + 1, DateTime.Now.AddDays(27).AddHours(2).ToString());
+                        foreach (var item in Transaction.transactionresponselist)
+                        {
+                            oh0.products.Add(new OrderHistory.Product() { Amount = item.savingsValue, Barcode = item.couponOid.ToString(), ProductName = item.name });
+                            TotalAmount += item.savingsValue;
+                        }
 
-            //OrderHistory o;
-            //OrderHistory Previous;
-            //OrderProduct product;
+                        oh0.OrderAmount = TotalAmount;
+                        Store.Orders.Add(oh0);
+                        TotalAmount = 0;
+                        foreach (var item in Store.Orders)
+                        {
+                            TotalAmount += item.OrderAmount;
+                        }
+                        _lblTotalDiscountAmountHistory.Content = Store.Currency + TotalAmount;
+                        Order.IsClosed = true;
+                        //CloseOrder();
+                        #region extras
+                        //Store.Orders.Add(oh1);
 
-            //for (int i = 1; i < 5; i++)
-            //{
-            //    Previous = oh0;
-            //    oh0 = new OrderHistory("oh" + );
+                        //OrderHistory o;
+                        //OrderHistory Previous;
+                        //OrderProduct product;
 
-            //    foreach (var item in Previous.products)
-            //    {
-            //        o.products.Add(item);
-            //    }
-            //    product = new Product() { Barcode = 1105 + i+"", ProductName = filleditems[5 + i].Barcode + "" };
-            //    product.Applicable = true;
-            //    product.productstatus = ProductStatus.Updated;
-            //    product.Amount = 5.00m * i;
-            //   o.Add(product);
-            //   Store.AllOrders.Add(o);
-            //}
+                        //for (int i = 1; i < 5; i++)
+                        //{
+                        //    Previous = oh0;
+                        //    oh0 = new OrderHistory("oh" + );
 
-            //Order.Clean(ref order);
-            #endregion
-            lvItems.Visibility = Visibility.Hidden;
-            _lblHeader.Content = Constants.HeaderTxndescription;
-            lvTxnHistory.Visibility = Visibility.Visible;
-            if (Txnview == null)
-            {
-                Txnview = CollectionViewSource.GetDefaultView(Store.Orders);
-                Txnview.GroupDescriptions.Clear();
-                Txnview.GroupDescriptions.Add(new PropertyGroupDescription("DateTime"));
-                lvTxnHistory.ItemsSource = Txnview;
-            }
-            else
-            {
-                Txnview.Refresh();
+                        //    foreach (var item in Previous.products)
+                        //    {
+                        //        o.products.Add(item);
+                        //    }
+                        //    product = new Product() { Barcode = 1105 + i+"", ProductName = filleditems[5 + i].Barcode + "" };
+                        //    product.Applicable = true;
+                        //    product.productstatus = ProductStatus.Updated;
+                        //    product.Amount = 5.00m * i;
+                        //   o.Add(product);
+                        //   Store.AllOrders.Add(o);
+                        //}
+
+                        //Order.Clean(ref order);
+                        #endregion
+
+                        lvItems.Visibility = Visibility.Hidden;
+                        _lblHeader.Content = Constants.HeaderTxndescription;
+                        lvTxnHistory.Visibility = Visibility.Visible;
+                        if (Txnview == null)
+                        {
+                            Txnview = CollectionViewSource.GetDefaultView(Store.Orders);
+                            Txnview.GroupDescriptions.Clear();
+                            Txnview.GroupDescriptions.Add(new PropertyGroupDescription("DateTime"));
+                            lvTxnHistory.ItemsSource = Txnview;
+                        }
+                        else
+                        {
+                            Txnview.Refresh();
+                        }
+                        Console.WriteLine("Order is Redeemed now.!!");
+                    }
+                    else
+                    {
+                        System.Windows.Forms.MessageBox.Show("Product count is 0", "GetRedeemTxn");
+                    }
+                }
             }
         }
         private void ResetScreen()
@@ -1095,8 +1169,18 @@ namespace RingRing
         }
         private void _btnFinishTxn_Click(object sender, RoutedEventArgs e)
         {
-            Clipboard.SetText(order.OrderNumber);
+            try
+            {
+                UIPermission clipBoard = new UIPermission(PermissionState.None);
+                clipBoard.Clipboard = UIPermissionClipboard.AllClipboard;
+                Clipboard.SetText(order.GettotalAmount.ToString());
+            }
+            catch( Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("CLipboard Copy Error" + ex.Message);
+            }
             CloseOrder();
+            Console.WriteLine("Order is Finished now.!!");
             ResetScreen();
         }
         private void BackImage_MouseDown(object sender, MouseButtonEventArgs e)

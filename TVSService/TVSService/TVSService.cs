@@ -14,6 +14,8 @@ using System.Timers;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Sockets;
+using System.Net;
+using System.Net.Http;
 
 namespace TVSService
 {
@@ -43,7 +45,7 @@ namespace TVSService
             {
                 // Instantiate a CSocketServer object
                 socketServer = new SocketServer();
-                // Start listening for connections
+                // Start listening for connecions
                 socketServer.Start("localhost", Port, 1024,null,
                     new Sockets.MessageHandler(MessageHandlerServer),
                     new Sockets.SocketServer.AcceptHandler(AcceptHandler),
@@ -177,22 +179,31 @@ namespace TVSService
             lock (this)
             {
                 //value = Encoding.ASCII.GetString(data);
+                Console.WriteLine("Received form client : " + value);
+                Constants.Log("Received form client : ", value);
                 datavalue = JsonConvert.DeserializeObject<ClientService>(value);
                 if (datavalue.productType == ProductType.UserProduct) //login  
                 {
+                    Transaction tx = new Transaction();
+                    ClientService sc = tx.MakeTransaction(datavalue);
+                    if (sc != null)
+                        Send(sc.ToJsonString());
+
+                    //Console.WriteLine("Received form client: " + datavalue.Product.Barcode);
+                    //string m = Transaction.PG_TxnStatus_Click(i++, "{\"MID\":\"Addval45631426206337\",\"ORDERID\":\"ORDER10000569" + i + "\",\"CHECKSUMHASH\":\"aEphUB%2bpoyFF6nlB44RgHYl6zePWKk858GJjYs2QsaGFLPLJ5EIYiUzPP01UBk7tJAkbmtxXp2TaB9CVLCqR0v15LM4%2fnrkv7LMPUq1urT0%3d\"}");
                     //Constants.Log("ProcessCode for UserProduct", value);
-                    Console.WriteLine("Received form client: " + datavalue.Product.Barcode);
-                    Thread.Sleep(2000);
-                    datavalue.Product.Amount = 5.00m;
-                    datavalue.productType = ProductType.ValidUserProduct;
-                    datavalue.Product.ProductName = datavalue.Product.Barcode;
-                    Send(datavalue.ToJsonString());
+                    //Thread.Sleep(2000);
+                    //datavalue.Product.Amount = 5.00m;
+                    //datavalue.productType = ProductType.ValidUserProduct;
+                    //datavalue.Product.ProductName = datavalue.Product.Barcode;
+                    //Send(m);
                     //Send to Server
                 }
                 else
                 {
                     //Constants.Log("ProcessCode for AnonymousProduct", value);
                     Constants.SaveAnonymousItem(datavalue.Product.Barcode);
+                    Constants.Log("Saved as Anonymous : ", value);
                     Console.WriteLine("Saved as Anonymous : " + datavalue.Product.Barcode);
                 }
             }
@@ -209,7 +220,8 @@ namespace TVSService
             lock (_lockforSendData)
             {
                 String json = Data;
-                //Console.WriteLine("Send back to Client : " + json);
+                Console.WriteLine("Send back to Client : " + json);
+                Constants.Log("Send back to Client : ", json);
                 pSocket.Send(json);
             }
         }
@@ -235,6 +247,7 @@ namespace TVSService
                 // Find a complete message
                 String strMessage = System.Text.ASCIIEncoding.ASCII.GetString(pSocket.RawBuffer, 0, iNumberOfBytes);
                 Thread thread = new Thread(() => ProcessCode(strMessage));
+                //ThreadPool.QueueUserWorkItem(DoRequest, countDown);
                 thread.IsBackground = true;
                 thread.Start();
                 //Console.WriteLine("Message=<{1}> Received {0} messages", m_Count++, strMessage);
@@ -254,10 +267,7 @@ namespace TVSService
         }
 
 
-
-
         #endregion
-
         //public void MyKeyUp(object sender, KeyEventArgs e)
         //{
         //    Constants.Log(this.GetType().Name, "MyKeyUp");

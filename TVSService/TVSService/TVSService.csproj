@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{164FC0E4-5636-4DB2-B6E3-FD588E70158B}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TVSService</RootNamespace>
     <AssemblyName>TVSService</AssemblyName>
@@ -45,6 +45,7 @@
       <HintPath>C:\Users\mayank1.gupta\Desktop\SocketWrapper\SocketServer\bin\Debug\Sockets.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />

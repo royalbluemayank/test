@@ -10,6 +10,7 @@ namespace TVSService
         public int ownerUserOid { get;  set; }
         public int storeUserOid { get;  set; }
         public string token { get;  set; }
+        public string status { get; set; }
         public string ToJsonString()
         {
             return JsonConvert.SerializeObject(this);
@@ -20,7 +21,8 @@ namespace TVSService
         AnonymousProduct = 0,
         UserProduct = 1,
         ValidUserProduct = 2,
-        NotValidUserProduct = 4
+        NotValidUserProduct = 4,
+        DeleteValidUserProduct = 8
     }
     public class Product
     {

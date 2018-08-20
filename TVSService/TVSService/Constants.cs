@@ -4,11 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
 
 namespace TVSService
 {
     class Constants
     {
+
         #region Constructor
         public Constants()
         {
@@ -16,10 +18,30 @@ namespace TVSService
         }
         #endregion
 
-        #region Constant Properties
+        #region Constant Properties 
+
+        private static string FolderpathValue = string.Empty;
 
         private static int ItemsCount = 0;
-        private static string Folderpath { get { return @"C:\"; } }
+        private static string Folderpath
+        {
+            get
+            {
+                if (FolderpathValue == string.Empty)
+                {
+                    object value = ConfigurationManager.AppSettings["Path"];
+                    if (value != null && value.ToString() != "")
+                    {
+                        FolderpathValue = value.ToString();
+                    }
+                    else
+                    {
+                        FolderpathValue = AppDomain.CurrentDomain.BaseDirectory;
+                    }
+                }
+                return FolderpathValue;
+            }
+        }
         private static string PathforSaveItem { get { return Folderpath + "ItemHistory.csv"; } }
         private static string PathforSendItem { get { return Folderpath + "SendItemHistory.csv"; } }
         public static string Pathforlogger { get { return Folderpath + "logs.txt"; } }
@@ -27,6 +49,7 @@ namespace TVSService
         private static string FileEndText { get { return "]}"; } }
         public static string UrlforMakeTransaction { get { return "https://api.dev.xaos.aintu.io/rest/txItem"; } }
         public static string UrlforGetTransaction { get { return "https://api.dev.xaos.aintu.io/rest/txClip"; } }
+        public static string UrlforDeleteTransaction { get { return "https://api.dev.xaos.aintu.io/rest/txClip"; } }
 
         #endregion
 
@@ -36,11 +59,6 @@ namespace TVSService
             try
             {
                 File.AppendAllText(PathforSaveItem, String.Format("{0},", ProductToJson(BarCode)));
-                //using (StreamWriter sw = new StreamWriter(File.Open(PathforSaveItem, FileMode.Append)))
-                //{
-                //    sw.Write(String.Format("{0},", ToJson(BarCode)));
-                //    ItemsCount++;
-                //}
                 SendAnonymousList();
                 return true;
             }

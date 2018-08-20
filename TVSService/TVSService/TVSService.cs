@@ -16,6 +16,8 @@ using Newtonsoft.Json;
 using Sockets;
 using System.Net;
 using System.Net.Http;
+using System.Configuration;
+using System.IO;
 
 namespace TVSService
 {
@@ -27,15 +29,15 @@ namespace TVSService
         //mayank static Listener listener;
         //Client client;
         //Thread thread;
-        System.Timers.Timer timer;
         private static object _lockforProcessdata = new object();
         private static object _lockforSendData = new object();
+        Process thisProc = Process.GetCurrentProcess();
         #endregion 
         int i = 0;
-        static int m_Count = 0;
         SocketServer socketServer;
-        SocketClient pSocket;
+        SocketClient pSocket = null;
         int Port = 8123;
+        private System.Timers.Timer timer = null;
 
         #region Constructor
         public TVSService()
@@ -44,14 +46,9 @@ namespace TVSService
             try
             {
                 // Instantiate a CSocketServer object
-                socketServer = new SocketServer();
-                // Start listening for connecions
-                socketServer.Start("localhost", Port, 1024,null,
-                    new Sockets.MessageHandler(MessageHandlerServer),
-                    new Sockets.SocketServer.AcceptHandler(AcceptHandler),
-                    new Sockets.CloseHandler(CloseHandler),
-                    new Sockets.ErrorHandler(ErrorHandler));
-                Console.WriteLine("Waiting for client on Machine: {0} Port: {1}", System.Environment.MachineName, Port);
+                if (socketServer == null)
+                    socketServer = new SocketServer();
+
                 // Stay here until you are ready to shutdown the server    
                 //Console.ReadLine();
                 //socketServer.Dispose();
@@ -62,7 +59,7 @@ namespace TVSService
             }
             catch (Exception ex)
             {
-                Console.WriteLine("ex :" + ex.StackTrace);
+                Constants.Log("Error :", "ex :" + ex.StackTrace);
             }
         }
         #endregion
@@ -76,15 +73,23 @@ namespace TVSService
         {
             try
             {
-                Console.WriteLine("Service Started");
-                Constants.Log("OnStart", "-----------------------------------------------------------------" + 
-                    Environment.NewLine + "Service Started @" + DateTime.Now.ToString());
+                // Start listening for connecions
+                socketServer.Start("localhost", Port, 1024, null,
+                    new Sockets.MessageHandler(MessageHandlerServer),
+                    new Sockets.SocketServer.AcceptHandler(AcceptHandler),
+                    new Sockets.CloseHandler(CloseHandler),
+                    new Sockets.ErrorHandler(ErrorHandler));
+                Constants.Log(String.Format("Waiting for client on Machine: {0} Port: {1}", System.Environment.MachineName, Port), "");
+                Console.WriteLine("Waiting for client on Machine: {0} Port: {1}", System.Environment.MachineName, Port);
+
+                Constants.Log("Service Started", "@" + DateTime.Now.ToString());
+
+                //FileInfo f = new FileInfo(AppDomain.CurrentDomain.BaseDirectory);
+                //Constants.Log("filepath", f.FullName);
                 //mayank listener.Start();
-                //timer = new System.Timers.Timer();
-                //timer.Interval = 1000;
-                //timer.Elapsed += Timer_Elapsed;
-                //timer.Enabled = true;
-                //timer.Start();
+                if (timer == null)
+                    timer = new System.Timers.Timer();
+                timer.Interval = 10000;
                 Constants.Log("OnStart", "listener : Start");
             }
             catch (Exception ex)
@@ -92,9 +97,22 @@ namespace TVSService
                 Constants.Log("OnStart exception", ex.StackTrace);
             }
         }
+
+        public bool IsProcessOpen(string name)
+        {
+            foreach (Process clsProcess in Process.GetProcesses())
+            {
+                if (clsProcess.ProcessName.Contains(name))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Console.WriteLine("" + i++);
+           
         }
 
         //private void HookManager_KeyDown(object sender, KeyEventArgs e)
@@ -199,6 +217,13 @@ namespace TVSService
                     //Send(m);
                     //Send to Server
                 }
+                //else if (datavalue.productType == ProductType.DeleteValidUserProduct)
+                //{
+                //    Transaction tx = new Transaction();
+                //    ClientService sc = tx.DeleteTransaction(datavalue);
+                //    if (sc != null)
+                //        Send(sc.ToJsonString());
+                //}
                 else
                 {
                     //Constants.Log("ProcessCode for AnonymousProduct", value);
@@ -212,8 +237,7 @@ namespace TVSService
         {
             //listener.Stop();
             //Console.WriteLine("Service Stopped");
-            Constants.Log("OnStop", "Service Stopped @" + DateTime.Now.ToString() + 
-                Environment.NewLine + "-----------------------------------------------------------------");
+            Constants.Log("Service Stopped", "@" + DateTime.Now.ToString());
         }
         public void Send(String Data)
         {
@@ -233,7 +257,8 @@ namespace TVSService
         }
         public static void CloseHandler(SocketBase socket)
         {
-            Console.WriteLine("Connection Closed" + Environment.NewLine + "------------------------------");
+            Constants.Log("CloseHandler client : ", socket.IpAddress);
+            //Console.WriteLine("Connection Closed" + Environment.NewLine + "------------------------------");
             //Console.WriteLine("IpAddress: " + socket.IpAddress);
         }
         /// <summary> Called when a message is extracted from the socket </summary>
@@ -262,12 +287,15 @@ namespace TVSService
         /// <param name="pSocket"> The SocketClient object the message came from </param>
         static public void AcceptHandler(SocketClient pSocket)
         {
-            Console.WriteLine("------------------------------" + Environment.NewLine + "Client connected..");
+            Constants.Log("Received form client : ", pSocket.IpAddress);
+            //Console.WriteLine("------------------------------" + Environment.NewLine + "Client connected..");
             //Console.WriteLine("IpAddress: " + pSocket.IpAddress);
         }
 
 
         #endregion
+
+        //Useless
         //public void MyKeyUp(object sender, KeyEventArgs e)
         //{
         //    Constants.Log(this.GetType().Name, "MyKeyUp");

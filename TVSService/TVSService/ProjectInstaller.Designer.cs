@@ -33,13 +33,18 @@
             // 
             // TVSServiceProcessInstaller
             // 
-            this.TVSServiceProcessInstaller.Account = System.ServiceProcess.ServiceAccount.LocalService;
+            this.TVSServiceProcessInstaller.Account = System.ServiceProcess.ServiceAccount.LocalSystem;
             this.TVSServiceProcessInstaller.Password = null;
             this.TVSServiceProcessInstaller.Username = null;
             // 
             // TVSServiceInstaller
             // 
-            this.TVSServiceInstaller.ServiceName = "TVSServiceInstaller Test";
+            this.TVSServiceInstaller.Description = "TVS Service owned by RingRing";
+            this.TVSServiceInstaller.DisplayName = "TVS Service";
+            this.TVSServiceInstaller.ServiceName = "TVS Service";
+            this.TVSServiceInstaller.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
+            this.TVSServiceInstaller.AfterInstall += new System.Configuration.Install.InstallEventHandler(this.TVSServiceInstaller_AfterInstall);
+            this.TVSServiceInstaller.BeforeUninstall += new System.Configuration.Install.InstallEventHandler(this.TVSServiceInstaller_BeforeUninstall);
             // 
             // ProjectInstaller
             // 
